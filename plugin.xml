@@ -30,6 +30,8 @@ version="1.0.0">
 		</config-file>
 		<header-file src="src/ios/OauthPlugin.h" />
 		<source-file src="src/ios/OauthPlugin.m" />
+		<header-file src="src/ios/PEASOAuthLibrary.h" />
+		<source-file src="src/ios/PEASOAuthLibrary.m" />
 
 	</platform>
 </plugin>
