@@ -239,20 +239,15 @@ static PEASOAuthLibrary* manager = nil;
     NSURL* urlScheme = [NSURL URLWithString:self.redirectUri];
     
     NSURL *candidateURL = [NSURL URLWithString:self.serverUrl];
-    if(self.consumerKey.length == 0)
-    {
+    if (!(candidateURL && candidateURL.scheme && candidateURL.host)) {
+        isValid = NO;
+        msg = @"Please provide valid server url.";
+    } else if(self.consumerKey.length == 0) {
         isValid = NO;
         msg = @"Please provide valid Consumer Key.";
-    }
-    else if(self.secreteKey.length == 0)
-    {
+    } else if(self.secreteKey.length == 0) {
         isValid = NO;
         msg = @"Please provide valid Secret Key.";
-    }
-    else if(![[UIApplication sharedApplication] canOpenURL:urlScheme])
-    {
-        isValid = NO;
-        msg = @"Please provide valid URL Scheme of app.";
     }
     
     
