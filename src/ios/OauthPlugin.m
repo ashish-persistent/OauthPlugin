@@ -17,22 +17,14 @@
 
 @implementation OauthPlugin
 - (void)getToken:(CDVInvokedUrlCommand *)cmd {
-    
     command = cmd;
-    PEASOAuthLibrary *library = [[PEASOAuthLibrary alloc] initWithServerURl:@"http://abhiejit-test.apigee.net/v1/test/"  redirectURL:@"OauthPlugin" consumerKey:@"dzCeNDaslpucNXeLrjzek4peM3DwoMlB" andSecretKey:@"DM7sAM3Dsb3MeAF1"];
+    NSDictionary *options = [cmd.arguments objectAtIndex:0];
+    NSString *baseURL = [options objectForKey:@"baseUrl"];
+    NSString *consumerKey = [options objectForKey:@"consumerKey"];
+    NSString *secretKey = [options objectForKey:@"secretKey"];
     
+    PEASOAuthLibrary *library = [[PEASOAuthLibrary alloc] initWithServerURl:baseURL  redirectURL:@"www.example.com" consumerKey:consumerKey andSecretKey:secretKey];
     [library authenticateUserWithCallbackObject:self selector:@selector(loginSuccess:)];
-    //    [library authenticateUserWithSuccess:^(id responseObject) {
-    //        CDVPluginResult *pluginResult = [ CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:responseObject];
-    //        [pluginResult setKeepCallbackAsBool:YES];
-    //        if(command) {
-    //            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    //        }
-    //
-    //    } failure:^(NSError *error) {
-    //
-    //    }];
-    
 }
 
 - (void)loginSuccess:(id)data {

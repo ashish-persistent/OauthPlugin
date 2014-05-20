@@ -55,18 +55,7 @@ static PEASOAuthLibrary* manager = nil;
     
     manager.consumerKey = consumersKey;
     manager.secreteKey = secretkey;
-    manager.redirectUri = [schemeUrl stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
-    NSURL *scheme = [NSURL URLWithString:manager.redirectUri];
-    
-    if (scheme && manager.redirectUri.length > 0) {
-        if (!scheme.scheme && !scheme.host) {
-            manager.redirectUri = [NSString stringWithFormat:@"%@://persistent",manager.redirectUri];
-        } else if (!scheme.host) {
-            manager.redirectUri = [NSString stringWithFormat:@"%@://persistent",manager.redirectUri];
-        }
-    }
-    NSLog(@"SCheme %@, Host %@ \n%@",scheme.scheme , scheme.host,self.redirectUri);
+    manager.redirectUri = schemeUrl;
 	return manager;
 }
 
@@ -249,8 +238,6 @@ static PEASOAuthLibrary* manager = nil;
         isValid = NO;
         msg = @"Please provide valid Secret Key.";
     }
-    
-    
     if (!isValid) {
         UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"oAuth" message:msg delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil, nil];
         [alert show];
