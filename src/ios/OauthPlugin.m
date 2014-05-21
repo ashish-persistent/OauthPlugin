@@ -23,7 +23,7 @@
     NSString *consumerKey = [options objectForKey:@"consumerKey"];
     NSString *secretKey = [options objectForKey:@"secretKey"];
     
-    PEASOAuthLibrary *library = [[PEASOAuthLibrary alloc] initWithServerURl:baseURL  redirectURL:@"www.example.com" consumerKey:consumerKey andSecretKey:secretKey];
+    PEASOAuthLibrary *library = [[PEASOAuthLibrary alloc] initWithServerURl:baseURL  redirectURL:@"OauthPlugin" consumerKey:consumerKey andSecretKey:secretKey];
     [library authenticateUserWithCallbackObject:self selector:@selector(loginSuccess:)];
 }
 
@@ -33,6 +33,11 @@
     if(command) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }
+}
+
+- (void)handleOpenURL:(NSNotification *)notification {
+    [[PEASOAuthLibrary sharedInstance] sendRequestForAccessTokenWithUrl:notification.object];
+
 }
 
 @end

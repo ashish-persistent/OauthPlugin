@@ -71,10 +71,7 @@
  * @param  selector : it is selector method in which access token is collected.
  * @return void.
  */
-- (void)authenticateUserWithCallbackObject:(id)anObject selector:(SEL)selector;
-
-
-//- (void)authenticateUserWithSuccess:(void (^)(id responseObject))success failure:(void (^)(NSError *error))failure;
+-(void)authenticateUserWithCallbackObject:(id)anObject selector:(SEL)selector;
 
 /**
  * @fn     +(id) sharedInstance;
