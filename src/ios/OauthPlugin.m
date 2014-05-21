@@ -22,8 +22,9 @@
     NSString *baseURL = [options objectForKey:@"baseUrl"];
     NSString *consumerKey = [options objectForKey:@"consumerKey"];
     NSString *secretKey = [options objectForKey:@"secretKey"];
-    
-    PEASOAuthLibrary *library = [[PEASOAuthLibrary alloc] initWithServerURl:baseURL  redirectURL:@"OauthPlugin" consumerKey:consumerKey andSecretKey:secretKey];
+    NSString *redirectUrl = [options objectForKey:@"redirectUrl"];
+
+    PEASOAuthLibrary *library = [[PEASOAuthLibrary alloc] initWithServerURl:baseURL  redirectURL:redirectUrl consumerKey:consumerKey andSecretKey:secretKey];
     [library authenticateUserWithCallbackObject:self selector:@selector(loginSuccess:)];
 }
 
