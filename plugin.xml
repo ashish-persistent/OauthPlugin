@@ -9,15 +9,59 @@ version="1.0.0">
 	<engines>
 		<engine name="cordova" version=">=2.7.0" />
 	</engines>
+	<platform name="android">
 
-	<!-- android -->
-	<!-- <platform name="android">
-	<config-file target="res/xml/config.xml" parent="plugins">
-	<plugin name="Echo" value="com.appgyver.plugin.Echo"/>
-	</config-file>
-	<source-file src="src/android/com/appgyver/plugin/Echo.java"
-	target-dir="src/com/appgyver/plugin" />
-	</platform> -->
+		<config-file target="res/xml/config.xml" parent="/*">
+			<feature name="OauthPlugin" >
+				<param name="android-package" value="OauthPlugin"/>
+			</feature>
+		</config-file>
+		<config-file target="AndroidManifest.xml" parent="/manifest">
+			<uses-permission android:name="android.permission.CAMERA" />
+			<uses-permission android:name="android.permission.VIBRATE" />
+			<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+			<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+			<uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+			<uses-permission android:name="android.permission.INTERNET" />
+			<uses-permission android:name="android.permission.RECEIVE_SMS" />
+			<uses-permission android:name="android.permission.RECORD_AUDIO" />
+			<uses-permission android:name="android.permission.RECORD_VIDEO" />
+			<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+			<uses-permission android:name="android.permission.READ_CONTACTS" />
+			<uses-permission android:name="android.permission.WRITE_CONTACTS" />
+			<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+			<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+			<uses-permission android:name="android.permission.GET_ACCOUNTS" />
+			<uses-permission android:name="android.permission.BROADCAST_STICKY" />
+			<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+		</config-file>
+		<config-file target="AndroidManifest.xml" parent="/manifest/application">
+			<activity android:name="com.persistentsys.plugin.RedirectedActivity" >
+				<intent-filter>
+					<action android:name="android.intent.action.VIEW" />
+					<action android:name="com.example.intentdemo.LAUNCH" />
+					<category android:name="android.intent.category.DEFAULT" />
+					<category android:name="android.intent.category.BROWSABLE" />
+					<category android:name="android.intent.category.LAUNCHER" />
+					<data android:scheme="oauthplugin" />
+				</intent-filter>
+			</activity>
+		</config-file>
+		
+		<source-file src="src/android/OauthPlugin.java" target-dir="src/android/" />
+		
+		<source-file src="src/android/com/persistent/sso/lib/PeasClientAuthenticationAuthorizeListener.java" target-dir="src/android/com/persistent/sso/lib/" />
+		<source-file src="src/android/com/persistent/sso/lib/PeasClientAuthenticationException.java" target-dir="src/android/com/persistent/sso/lib/" />
+		<source-file src="src/android/com/persistent/sso/lib/PeasClientAuthenticationTokenListener.java" target-dir="src/android/com/persistent/sso/lib/" />
+		<source-file src="src/android/com/persistent/sso/lib/PeasClientAuthenticator.java" target-dir="src/android/com/persistent/sso/lib/" />
+		
+		<source-file src="src/android/com/persistent/sso/network/NetworkUtility.java" target-dir="src/android/com/persistent/sso/network/" />
+		<source-file src="src/android/com/persistent/sso/network/NetworkUtilityListener.java" target-dir="src/android/com/persistent/sso/network/" />
+		
+		<source-file src="src/android/com/persistentsys/plugin/OAuthPluginListener.java" target-dir="src/android/com/persistentsys/plugin/" />
+		<source-file src="src/android/com/persistentsys/plugin/RedirectedActivity.java" target-dir="src/android/com/persistentsys/plugin/" />
+
+	</platform>
 	<!-- ios -->
 	<platform name="ios">
 		<config-file target="config.xml" parent="/*/plugins">
