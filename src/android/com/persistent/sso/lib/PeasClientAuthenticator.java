@@ -132,14 +132,14 @@ public class PeasClientAuthenticator {
 		Uri customUri = intent.getData();
 		final String authCode = customUri
 				.getQueryParameter(QUERY_PARAMATER_AUTH_CODE);
-		Intent i = new Intent(activity, pluginActivity.getClass());
+//		Intent i = new Intent(activity, pluginActivity.getClass());
 //		i.addCategory(Intent.CATEGORY_BROWSABLE);
 //		i.setAction(Intent.ACTION_MAIN);
-		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 //		i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-		activity.startActivity(i);
-		activity.finish();
+//		activity.startActivity(i);
+//		activity.finish();
 
 		if (baseUrl == null || clientID == null || secretKey == null
 				|| authCode == null || redirectUrl == null) {
