@@ -20,6 +20,8 @@ public class OauthPlugin extends CordovaPlugin {
 			final CallbackContext callbackContext) throws JSONException {
 		// TODO Auto-generated method stub
 		super.execute(action, args, callbackContext);
+        Log.v("iGreet", "iGreet: execute");
+
 		try {
 			if (ACTION_ADD_CALENDAR_ENTRY.equals(action)) {
 				JSONObject arg_object = args.getJSONObject(0);
