@@ -43,7 +43,7 @@ version="1.0.0">
 					<category android:name="android.intent.category.DEFAULT" />
 					<category android:name="android.intent.category.BROWSABLE" />
 					<category android:name="android.intent.category.LAUNCHER" />
-					<data android:scheme="iGreet" />
+					<data android:scheme="igreet" />
 				</intent-filter>
 			</activity>
 		</config-file>
