@@ -17,17 +17,8 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.persistent.sso.network.NetworkUtility;
-import com.persistentsys.plugin.OAuthPluginListener;
 
-public class PeasClientAuthenticator {
-
-	private String clientID, redirectUrl, baseUrl, secretKey, ssoUrl;
-	private OAuthPluginListener listener;
-	private final static String QUERY_PARAMATER_AUTH_CODE = "code";
-
-	private static final String TAG = "PeasClientAuthenticator";
-
-	private Activity pluginActivity;
+public class PeasClientAuthenticator extends BaseAuthenticator {
 
 	static final String HEADER_KEY_SSO_API_APPID = "appid";
 	static final String HEADER_VALUE_SSO_API_APPID = "peasappv2";
@@ -43,38 +34,16 @@ public class PeasClientAuthenticator {
 	private static PeasClientAuthenticator instance = null;
 
 	private PeasClientAuthenticator() {
-		clientID = redirectUrl = baseUrl = secretKey = ssoUrl = null;
-
+		super();
 	}
 
-	public void setPluginActivity(Activity pluginActivity) {
-		this.pluginActivity = pluginActivity;
-	}
 
-	public void setParams(String baseUrl, String clientID, String secretKey,
-			String redirectUrl) {
-		this.baseUrl = baseUrl;
-		this.clientID = clientID;
-		this.secretKey = secretKey;
-		this.redirectUrl = redirectUrl;
-	}
-
-	public void setListener(OAuthPluginListener listener) {
-		this.listener = listener;
-	}
-
-	public void authorize() throws PeasClientAuthenticationException {
-		Log.v("iGreet", "iGreet: authorize");
-
-		String url;
-		if (ssoUrl == null) {
-			url = baseUrl;
-		} else {
-			url = ssoUrl;
-		}
-
+	public void authorize(String url) {
+		Log.v(TAG, "iGreet: authorize: " + url);
+		baseUrl = url;
+		
 		final StringBuilder sb = new StringBuilder();
-		sb.append(url);
+		sb.append(baseUrl);
 
 		sb.append("/authorize?response_type=code&client_id=");
 		sb.append(clientID);
@@ -108,7 +77,7 @@ public class PeasClientAuthenticator {
 
 	}
 
-	public void peasAuthorize() throws PeasClientAuthenticationException {
+	public void peasAuthorize(String url) throws PeasClientAuthenticationException {
 		Log.v("iGreet", "iGreet: peasAuthorize");
 
 		if (baseUrl == null || clientID == null || redirectUrl == null) {
@@ -124,13 +93,7 @@ public class PeasClientAuthenticator {
 				if (ssoUrl == null) {
 					this.onFailure(null);
 				} else {
-					try {
-						PeasClientAuthenticator.this.ssoUrl = ssoUrl;
-						authorize();
-					} catch (PeasClientAuthenticationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					authorize(ssoUrl);
 				}
 			}
 
@@ -164,14 +127,7 @@ public class PeasClientAuthenticator {
 					"Invalid clientID or Secret or authCode");
 		}
 
-		String url;
-		if (ssoUrl == null) {
-			url = baseUrl;
-		} else {
-			url = ssoUrl;
-		}
-
-		new SendAcessTokenRequestTask(clientID, secretKey, authCode, url,
+		new SendAcessTokenRequestTask(clientID, secretKey, authCode, baseUrl,
 				redirectUrl, new PeasClientAuthenticationTokenListener() {
 
 					@Override
@@ -186,87 +142,12 @@ public class PeasClientAuthenticator {
 
 					}
 				}).execute();
-		// new GetSsoUrkTaskt(baseUrl, new SsoUrlTaskListener() {
-		// @Override
-		// public void onReceivedSsoUrl(String ssoURL) {
-		// new SendAcessTokenRequestTask(clientID, secretKey, authCode,
-		// ssoURL, redirectUrl,
-		// new PeasClientAuthenticationTokenListener() {
-		//
-		// @Override
-		// public void onTokenReceived(JSONObject authResponse) {
-		// listener.onSuccess(authResponse);
-		//
-		// }
-		//
-		// @Override
-		// public void onTokenNotReceived() {
-		// // TODO Auto-generated method stub
-		//
-		// }
-		// }).execute();
-		// }
-		//
-		// @Override
-		// public void onFailure(String reason) {
-		//
-		// }
-		// }).execute();
 	}
 
 	private String getIMEI() {
 		final TelephonyManager telephonymanager = (TelephonyManager) pluginActivity
 				.getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
 		return telephonymanager.getDeviceId();
-	}
-
-	public static class oAuthResponse {
-
-		// Name of the fields in JSON used while parsing
-		public static final String ACCESS_TOKEN = "access_token";
-		public static final String ACCESS_PASSWORD = "password ";
-		public static final String ACCESS_USERNAME = "userName";
-		public static final String ACCESS_DOMAIN = "domainName";
-
-		public static final String ACCESS_CODE = "code";
-
-		private String access_token;
-		private String username;
-		private String password;
-		private String domainName;
-
-		public String getAccessToken() {
-			return access_token;
-		}
-
-		public void setAccessToken(String token) {
-			access_token = token;
-		}
-
-		public String getUsername() {
-			return username;
-		}
-
-		public void setUsername(String username) {
-			this.username = username;
-		}
-
-		public String getPassword() {
-			return password;
-		}
-
-		public void setPassword(String password) {
-			this.password = password;
-		}
-
-		public String getDomainName() {
-			return domainName;
-		}
-
-		public void setDomainName(String domainName) {
-			this.domainName = domainName;
-		}
-
 	}
 }
 
@@ -310,10 +191,6 @@ class GetSsoUrkTaskt extends AsyncTask<String, Void, String> {
 	@Override
 	protected void onPostExecute(String ssoUrl) {
 		super.onPostExecute(ssoUrl);
-
-		System.out
-				.println("GetSsoUrkTaskt.onPostExecute(): ssoUrl = " + ssoUrl);
-
 		if (ssoUrl != null) {
 			if (listener != null) {
 				listener.onReceivedSsoUrl(ssoUrl);
@@ -457,8 +334,6 @@ class SendAcessTokenRequestTask extends AsyncTask<String, Void, String> {
 
 	private JSONObject parseAcessToken(String responseData) {
 
-		System.out
-				.println("parseAccessToken(): responseData = " + responseData);
 		JSONObject jsonObj = null;
 		try {
 			jsonObj = new JSONObject(responseData);
@@ -468,34 +343,6 @@ class SendAcessTokenRequestTask extends AsyncTask<String, Void, String> {
 			e1.printStackTrace();
 		}
 		return null;
-		/*
-		 * Log.v("Json", "Json" + jsonObj); final oAuthResponse tokenDetials =
-		 * new oAuthResponse();
-		 * 
-		 * try { final JSONTokener tokener = new JSONTokener(responseData);
-		 * JSONObject jsonObject = new JSONObject(tokener);
-		 * 
-		 * if (jsonObject.has(oAuthResponse.ACCESS_TOKEN)) { final String
-		 * accessToken = jsonObject .getString(oAuthResponse.ACCESS_TOKEN);
-		 * tokenDetials.setAccessToken(accessToken); }
-		 * 
-		 * if (jsonObject.has(oAuthResponse.ACCESS_USERNAME)) { final String
-		 * username = jsonObject .getString(oAuthResponse.ACCESS_USERNAME);
-		 * tokenDetials.setUsername(username); }
-		 * 
-		 * if (jsonObject.has("password")) { final String pwd =
-		 * jsonObject.getString("password"); tokenDetials.setPassword(pwd);
-		 * 
-		 * System.out.println("parseAccessToken(): set pwd  = " + pwd); }
-		 * 
-		 * if (jsonObject.has(oAuthResponse.ACCESS_DOMAIN)) { final String
-		 * domain = jsonObject .getString(oAuthResponse.ACCESS_DOMAIN);
-		 * tokenDetials.setDomainName(domain); }
-		 * 
-		 * } catch (JSONException e) { e.printStackTrace(); }
-		 */
-
-		// return tokenDetials;
 	}
 
 }

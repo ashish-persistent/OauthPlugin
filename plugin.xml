@@ -43,6 +43,16 @@ version="1.0.0">
 					<category android:name="android.intent.category.DEFAULT" />
 					<category android:name="android.intent.category.BROWSABLE" />
 					<category android:name="android.intent.category.LAUNCHER" />
+					<data android:scheme="igreet_peas" />
+				</intent-filter>
+			</activity>
+			<activity android:name="com.persistentsys.plugin.EnterpriseRedirectActivity" >
+				<intent-filter>
+					<action android:name="android.intent.action.VIEW" />
+					<action android:name="com.example.intentdemo.LAUNCH" />
+					<category android:name="android.intent.category.DEFAULT" />
+					<category android:name="android.intent.category.BROWSABLE" />
+					<category android:name="android.intent.category.LAUNCHER" />
 					<data android:scheme="igreet" />
 				</intent-filter>
 			</activity>
@@ -54,12 +64,15 @@ version="1.0.0">
 		<source-file src="src/android/com/persistent/sso/lib/PeasClientAuthenticationException.java" target-dir="src/android/com/persistent/sso/lib/" />
 		<source-file src="src/android/com/persistent/sso/lib/PeasClientAuthenticationTokenListener.java" target-dir="src/android/com/persistent/sso/lib/" />
 		<source-file src="src/android/com/persistent/sso/lib/PeasClientAuthenticator.java" target-dir="src/android/com/persistent/sso/lib/" />
+		<source-file src="src/android/com/persistent/sso/lib/BaseAuthenticator.java" target-dir="src/android/com/persistent/sso/lib/" />
+		<source-file src="src/android/com/persistent/sso/lib/EnterpriseAuthenticator.java" target-dir="src/android/com/persistent/sso/lib/" />
 		
 		<source-file src="src/android/com/persistent/sso/network/NetworkUtility.java" target-dir="src/android/com/persistent/sso/network/" />
 		<source-file src="src/android/com/persistent/sso/network/NetworkUtilityListener.java" target-dir="src/android/com/persistent/sso/network/" />
 		
 		<source-file src="src/android/com/persistentsys/plugin/OAuthPluginListener.java" target-dir="src/android/com/persistentsys/plugin/" />
 		<source-file src="src/android/com/persistentsys/plugin/RedirectedActivity.java" target-dir="src/android/com/persistentsys/plugin/" />
+		<source-file src="src/android/com/persistentsys/plugin/EnterpriseRedirectActivity.java" target-dir="src/android/com/persistentsys/plugin/" />
 
 	</platform>
 	<!-- ios -->
