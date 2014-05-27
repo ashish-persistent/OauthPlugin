@@ -21,7 +21,7 @@ import com.persistentsys.plugin.OAuthPluginListener;
 
 public class PeasClientAuthenticator {
 
-	private String clientID, redirectUrl, baseUrl, secretKey;
+	private String clientID, redirectUrl, baseUrl, secretKey, ssoUrl;
 	private OAuthPluginListener listener;
 	private final static String QUERY_PARAMATER_AUTH_CODE = "code";
 
@@ -37,16 +37,16 @@ public class PeasClientAuthenticator {
 		if (instance == null) {
 			instance = new PeasClientAuthenticator();
 		}
-
 		return instance;
 	}
 
 	private static PeasClientAuthenticator instance = null;
 
 	private PeasClientAuthenticator() {
+		clientID = redirectUrl = baseUrl = secretKey = ssoUrl = null;
 
 	}
-	
+
 	public void setPluginActivity(Activity pluginActivity) {
 		this.pluginActivity = pluginActivity;
 	}
@@ -56,7 +56,7 @@ public class PeasClientAuthenticator {
 		this.baseUrl = baseUrl;
 		this.clientID = clientID;
 		this.secretKey = secretKey;
-		this.redirectUrl = redirectUrl + "://dummyURL";
+		this.redirectUrl = redirectUrl;
 	}
 
 	public void setListener(OAuthPluginListener listener) {
@@ -64,6 +64,50 @@ public class PeasClientAuthenticator {
 	}
 
 	public void authorize() throws PeasClientAuthenticationException {
+
+		String url;
+		if (ssoUrl == null) {
+			url = baseUrl;
+		} else {
+			url = ssoUrl;
+		}
+
+		final StringBuilder sb = new StringBuilder();
+		sb.append(url);
+
+		sb.append("/authorize?response_type=code&client_id=");
+		sb.append(clientID);
+
+		sb.append("&scope=READ&state=");
+		sb.append(baseUrl);
+
+		sb.append("&deviceId=");
+		sb.append(getIMEI());
+
+		sb.append("&deviceOs=Android");
+
+		sb.append("&deviceOsVersion=");
+		sb.append(android.os.Build.VERSION.RELEASE);
+
+		sb.append("&packageName=");
+		sb.append(pluginActivity.getBaseContext().getPackageName());
+
+		sb.append("&apiName=DummyApiName");
+
+		sb.append("&redirect_url=");
+		sb.append(redirectUrl);
+
+		final String finalAuthURI = sb.toString();
+		Log.d(TAG, TAG + ".authorize(): finalAuthURI = " + finalAuthURI);
+
+		final Uri authUri = Uri.parse(finalAuthURI);
+		final Intent launchBrowser = new Intent(Intent.ACTION_VIEW, authUri);
+		launchBrowser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		pluginActivity.getBaseContext().startActivity(launchBrowser);
+
+	}
+
+	public void peasAuthorize() throws PeasClientAuthenticationException {
 		if (baseUrl == null || clientID == null || redirectUrl == null) {
 			throw new PeasClientAuthenticationException(
 					"Invalid parameters for authorize");
@@ -77,42 +121,11 @@ public class PeasClientAuthenticator {
 					this.onFailure(null);
 				} else {
 					try {
-						final StringBuilder sb = new StringBuilder();
-						sb.append(ssoUrl);
-
-						sb.append("/authorize?response_type=code&client_id=");
-						sb.append(clientID);
-
-						sb.append("&scope=READ&state=");
-						sb.append(baseUrl);
-
-						sb.append("&deviceId=");
-						sb.append(getIMEI());
-
-						sb.append("&deviceOs=Android");
-
-						sb.append("&deviceOsVersion=");
-						sb.append(android.os.Build.VERSION.RELEASE);
-
-						sb.append("&packageName=");
-						sb.append(pluginActivity.getBaseContext().getPackageName());
-
-						sb.append("&apiName=DummyApiName");
-
-						sb.append("&redirect_url=");
-						sb.append(redirectUrl);
-
-						final String finalAuthURI = sb.toString();
-						Log.d(TAG, TAG + ".authorize(): finalAuthURI = "
-								+ finalAuthURI);
-
-						final Uri authUri = Uri.parse(finalAuthURI);
-						final Intent launchBrowser = new Intent(
-								Intent.ACTION_VIEW, authUri);
-						launchBrowser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						pluginActivity.getBaseContext().startActivity(launchBrowser);
-					} catch (Exception ex) {
-						ex.printStackTrace();
+						PeasClientAuthenticator.this.ssoUrl = ssoUrl;
+						authorize();
+					} catch (PeasClientAuthenticationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}
@@ -133,11 +146,11 @@ public class PeasClientAuthenticator {
 		final String authCode = customUri
 				.getQueryParameter(QUERY_PARAMATER_AUTH_CODE);
 		Intent i = new Intent(activity, pluginActivity.getClass());
-//		i.addCategory(Intent.CATEGORY_BROWSABLE);
-//		i.setAction(Intent.ACTION_MAIN);
+		// i.addCategory(Intent.CATEGORY_BROWSABLE);
+		// i.setAction(Intent.ACTION_MAIN);
 		i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//		i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+		// i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 		activity.startActivity(i);
 		activity.finish();
 		Log.v("iGreet", "iGreet: " + authCode);
@@ -147,38 +160,59 @@ public class PeasClientAuthenticator {
 					"Invalid clientID or Secret or authCode");
 		}
 
-		new GetSsoUrkTaskt(baseUrl, new SsoUrlTaskListener() {
-			@Override
-			public void onReceivedSsoUrl(String ssoURL) {
-				new SendAcessTokenRequestTask(clientID, secretKey, authCode,
-						ssoURL, redirectUrl,
-						new PeasClientAuthenticationTokenListener() {
+		String url;
+		if (ssoUrl == null) {
+			url = baseUrl;
+		} else {
+			url = ssoUrl;
+		}
 
-							@Override
-							public void onTokenReceived(
-									JSONObject authResponse) {
-								listener.onSuccess(authResponse);
+		new SendAcessTokenRequestTask(clientID, secretKey, authCode, url,
+				redirectUrl, new PeasClientAuthenticationTokenListener() {
 
-							}
+					@Override
+					public void onTokenReceived(JSONObject authResponse) {
+						listener.onSuccess(authResponse);
 
-							@Override
-							public void onTokenNotReceived() {
-								// TODO Auto-generated method stub
+					}
 
-							}
-						}).execute();
-			}
+					@Override
+					public void onTokenNotReceived() {
+						// TODO Auto-generated method stub
 
-			@Override
-			public void onFailure(String reason) {
-
-			}
-		}).execute();
+					}
+				}).execute();
+		// new GetSsoUrkTaskt(baseUrl, new SsoUrlTaskListener() {
+		// @Override
+		// public void onReceivedSsoUrl(String ssoURL) {
+		// new SendAcessTokenRequestTask(clientID, secretKey, authCode,
+		// ssoURL, redirectUrl,
+		// new PeasClientAuthenticationTokenListener() {
+		//
+		// @Override
+		// public void onTokenReceived(JSONObject authResponse) {
+		// listener.onSuccess(authResponse);
+		//
+		// }
+		//
+		// @Override
+		// public void onTokenNotReceived() {
+		// // TODO Auto-generated method stub
+		//
+		// }
+		// }).execute();
+		// }
+		//
+		// @Override
+		// public void onFailure(String reason) {
+		//
+		// }
+		// }).execute();
 	}
 
 	private String getIMEI() {
-		final TelephonyManager telephonymanager = (TelephonyManager) pluginActivity.getBaseContext()
-				.getSystemService(Context.TELEPHONY_SERVICE);
+		final TelephonyManager telephonymanager = (TelephonyManager) pluginActivity
+				.getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
 		return telephonymanager.getDeviceId();
 	}
 
@@ -430,43 +464,34 @@ class SendAcessTokenRequestTask extends AsyncTask<String, Void, String> {
 			e1.printStackTrace();
 		}
 		return null;
-		/*Log.v("Json", "Json" + jsonObj);
-		final oAuthResponse tokenDetials = new oAuthResponse();
+		/*
+		 * Log.v("Json", "Json" + jsonObj); final oAuthResponse tokenDetials =
+		 * new oAuthResponse();
+		 * 
+		 * try { final JSONTokener tokener = new JSONTokener(responseData);
+		 * JSONObject jsonObject = new JSONObject(tokener);
+		 * 
+		 * if (jsonObject.has(oAuthResponse.ACCESS_TOKEN)) { final String
+		 * accessToken = jsonObject .getString(oAuthResponse.ACCESS_TOKEN);
+		 * tokenDetials.setAccessToken(accessToken); }
+		 * 
+		 * if (jsonObject.has(oAuthResponse.ACCESS_USERNAME)) { final String
+		 * username = jsonObject .getString(oAuthResponse.ACCESS_USERNAME);
+		 * tokenDetials.setUsername(username); }
+		 * 
+		 * if (jsonObject.has("password")) { final String pwd =
+		 * jsonObject.getString("password"); tokenDetials.setPassword(pwd);
+		 * 
+		 * System.out.println("parseAccessToken(): set pwd  = " + pwd); }
+		 * 
+		 * if (jsonObject.has(oAuthResponse.ACCESS_DOMAIN)) { final String
+		 * domain = jsonObject .getString(oAuthResponse.ACCESS_DOMAIN);
+		 * tokenDetials.setDomainName(domain); }
+		 * 
+		 * } catch (JSONException e) { e.printStackTrace(); }
+		 */
 
-		try {
-			final JSONTokener tokener = new JSONTokener(responseData);
-			JSONObject jsonObject = new JSONObject(tokener);
-
-			if (jsonObject.has(oAuthResponse.ACCESS_TOKEN)) {
-				final String accessToken = jsonObject
-						.getString(oAuthResponse.ACCESS_TOKEN);
-				tokenDetials.setAccessToken(accessToken);
-			}
-
-			if (jsonObject.has(oAuthResponse.ACCESS_USERNAME)) {
-				final String username = jsonObject
-						.getString(oAuthResponse.ACCESS_USERNAME);
-				tokenDetials.setUsername(username);
-			}
-
-			if (jsonObject.has("password")) {
-				final String pwd = jsonObject.getString("password");
-				tokenDetials.setPassword(pwd);
-
-				System.out.println("parseAccessToken(): set pwd  = " + pwd);
-			}
-
-			if (jsonObject.has(oAuthResponse.ACCESS_DOMAIN)) {
-				final String domain = jsonObject
-						.getString(oAuthResponse.ACCESS_DOMAIN);
-				tokenDetials.setDomainName(domain);
-			}
-
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}*/
-
-//		return tokenDetials;
+		// return tokenDetials;
 	}
 
 }
