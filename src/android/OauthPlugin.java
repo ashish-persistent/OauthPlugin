@@ -29,6 +29,7 @@ public class OauthPlugin extends CordovaPlugin {
 			String consumerKey = arg_object.getString("consumerKey");
 			String secretKey = arg_object.getString("secretKey");
 			String redirectUrl = arg_object.getString("redirectUrl");
+			Log.v("iGreet", "iGreet:" + baseUrl + consumerKey + secretKey + redirectUrl + action);
 			
 			PeasClientAuthenticator auth = PeasClientAuthenticator.getAuthenticationHandler();
 			auth.setPluginActivity(this.cordova.getActivity());

@@ -64,6 +64,7 @@ public class PeasClientAuthenticator {
 	}
 
 	public void authorize() throws PeasClientAuthenticationException {
+		Log.v("iGreet", "iGreet: authorize");
 
 		String url;
 		if (ssoUrl == null) {
@@ -108,7 +109,10 @@ public class PeasClientAuthenticator {
 	}
 
 	public void peasAuthorize() throws PeasClientAuthenticationException {
+		Log.v("iGreet", "iGreet: peasAuthorize");
+
 		if (baseUrl == null || clientID == null || redirectUrl == null) {
+			Log.v("iGreet", "iGreet: Invalid parameters for authorize");
 			throw new PeasClientAuthenticationException(
 					"Invalid parameters for authorize");
 		}
