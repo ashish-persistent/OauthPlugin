@@ -89,6 +89,8 @@ version="1.0.0">
 		<source-file src="src/ios/OauthPlugin.m" />
 		<header-file src="src/ios/PEASOAuthLibrary.h" />
 		<source-file src="src/ios/PEASOAuthLibrary.m" />
+		<header-file src="src/ios/EnterpriseOAuthLibrary.h" />
+		<source-file src="src/ios/EnterpriseOAuthLibrary.m" />
 
 	</platform>
 </plugin>

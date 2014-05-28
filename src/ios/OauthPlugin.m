@@ -8,6 +8,7 @@
 
 #import "OauthPlugin.h"
 #import "PEASOAuthLibrary.h"
+#import "EnterpriseOAuthLibrary.h"
 
 @interface OauthPlugin () {
     CDVInvokedUrlCommand        *command;
@@ -16,6 +17,21 @@
 @end
 
 @implementation OauthPlugin
+
+
+- (void)enterpriseAuthorize:(CDVInvokedUrlCommand *)cmd {
+    command = cmd;
+    NSDictionary *options = [cmd.arguments objectAtIndex:0];
+    NSString *baseURL = [options objectForKey:@"baseUrl"];
+    NSString *consumerKey = [options objectForKey:@"consumerKey"];
+    NSString *secretKey = [options objectForKey:@"secretKey"];
+    NSString *redirectUrl = [options objectForKey:@"redirectUrl"];
+    
+    EnterpriseOAuthLibrary *library = [[EnterpriseOAuthLibrary alloc] initWithServerURl:baseURL  redirectURL:redirectUrl consumerKey:consumerKey andSecretKey:secretKey];
+    [library authenticateUserWithCallbackObject:self selector:@selector(loginSuccess:)];
+}
+
+
 - (void)getToken:(CDVInvokedUrlCommand *)cmd {
     command = cmd;
     NSDictionary *options = [cmd.arguments objectAtIndex:0];
@@ -37,7 +53,16 @@
 }
 
 - (void)handleOpenURL:(NSNotification *)notification {
-    [[PEASOAuthLibrary sharedInstance] sendRequestForAccessTokenWithUrl:notification.object];
+    NSURL *redirectUrl = notification.object;
+    NSString *url = [redirectUrl absoluteString];
+    NSRange range = [url rangeOfString:@":"];
+    NSString *scheme = [url substringToIndex:range.location];
+    
+    if([scheme isEqualToString:@"igreet_peas"]) {
+        [[PEASOAuthLibrary sharedInstance] sendRequestForAccessTokenWithUrl:notification.object];
+    } else if([scheme isEqualToString:@"igreet"]) {
+        [[EnterpriseOAuthLibrary sharedInstance] sendRequestForAccessTokenWithUrl:notification.object];
+    }
 
 }
 

@@ -12,4 +12,5 @@
 
 
 - (void)getToken:(CDVInvokedUrlCommand *)command;
+- (void)enterpriseAuthorize:(CDVInvokedUrlCommand *)command;
 @end
