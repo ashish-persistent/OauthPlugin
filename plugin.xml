@@ -9,6 +9,8 @@ version="1.0.0">
 	<engines>
 		<engine name="cordova" version=">=2.7.0" />
 	</engines>
+	<preference name="SCHEME_NAME" />
+	<preference name="SCHEME_NAME_PEAS" />
 	<platform name="android">
 
 		<config-file target="res/xml/config.xml" parent="/*">
@@ -43,7 +45,7 @@ version="1.0.0">
 					<category android:name="android.intent.category.DEFAULT" />
 					<category android:name="android.intent.category.BROWSABLE" />
 					<category android:name="android.intent.category.LAUNCHER" />
-					<data android:scheme="igreet_peas" />
+					<data android:scheme="$SCHEME_NAME_PEAS" />
 				</intent-filter>
 			</activity>
 			<activity android:name="com.persistentsys.plugin.EnterpriseRedirectActivity" >
@@ -53,7 +55,7 @@ version="1.0.0">
 					<category android:name="android.intent.category.DEFAULT" />
 					<category android:name="android.intent.category.BROWSABLE" />
 					<category android:name="android.intent.category.LAUNCHER" />
-					<data android:scheme="igreet" />
+					<data android:scheme="$SCHEME_NAME" />
 				</intent-filter>
 			</activity>
 		</config-file>
