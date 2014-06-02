@@ -9,8 +9,8 @@ version="1.0.0">
 	<engines>
 		<engine name="cordova" version=">=2.7.0" />
 	</engines>
-	<preference name="SCHEME_NAME" />
-	<preference name="SCHEME_NAME_PEAS" />
+	<preference name="SCHEME_ENTERPRISE" />
+	<preference name="SCHEME_PEAS" />
 	<platform name="android">
 
 		<config-file target="res/xml/config.xml" parent="/*">
@@ -45,7 +45,7 @@ version="1.0.0">
 					<category android:name="android.intent.category.DEFAULT" />
 					<category android:name="android.intent.category.BROWSABLE" />
 					<category android:name="android.intent.category.LAUNCHER" />
-					<data android:scheme="$SCHEME_NAME_PEAS" />
+					<data android:scheme="$SCHEME_PEAS" />
 				</intent-filter>
 			</activity>
 			<activity android:name="com.persistentsys.plugin.EnterpriseRedirectActivity" >
@@ -55,7 +55,7 @@ version="1.0.0">
 					<category android:name="android.intent.category.DEFAULT" />
 					<category android:name="android.intent.category.BROWSABLE" />
 					<category android:name="android.intent.category.LAUNCHER" />
-					<data android:scheme="$SCHEME_NAME" />
+					<data android:scheme="$SCHEME_ENTERPRISE" />
 				</intent-filter>
 			</activity>
 		</config-file>
