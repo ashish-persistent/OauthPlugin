@@ -39,7 +39,7 @@ public class OauthPlugin extends CordovaPlugin {
 			if(ACTION_ENTERPRISE_AUTHORIZE.equals(action)) {
 				EnterpriseAuthenticator authenticator = EnterpriseAuthenticator.getAuthenticationHandler();
 				authenticator.setPluginActivity(this.cordova.getActivity());
-				authenticator.setParams(baseUrl, consumerKey, secretKey, redirectUrl);
+				authenticator.setParams(consumerKey, secretKey, redirectUrl);
 				authenticator.setListener(new OAuthPluginListener() {
 					
 					@Override
@@ -61,7 +61,7 @@ public class OauthPlugin extends CordovaPlugin {
 				
 				PeasClientAuthenticator authenticator = PeasClientAuthenticator.getAuthenticationHandler();
 				authenticator.setPluginActivity(this.cordova.getActivity());
-				authenticator.setParams(baseUrl, consumerKey, secretKey, redirectUrl);
+				authenticator.setParams(consumerKey, secretKey, redirectUrl);
 				authenticator.setListener(new OAuthPluginListener() {
 					
 					@Override

@@ -40,10 +40,9 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 
 	public void authorize(String url) {
 		Log.v(TAG, "iGreet: authorize: " + url);
-		baseUrl = url;
 		
 		final StringBuilder sb = new StringBuilder();
-		sb.append(baseUrl);
+		sb.append(url);
 
 		sb.append("/authorize?response_type=code&client_id=");
 		sb.append(clientID);
@@ -66,6 +65,7 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 
 		sb.append("&redirect_url=");
 		sb.append(redirectUrl);
+		baseUrl = url;
 
 		final String finalAuthURI = sb.toString();
 		Log.d(TAG, TAG + ".authorize(): finalAuthURI = " + finalAuthURI);
@@ -79,7 +79,7 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 
 	public void peasAuthorize(String url) throws PeasClientAuthenticationException {
 		Log.v("iGreet", "iGreet: peasAuthorize");
-
+		baseUrl = url;
 		if (baseUrl == null || clientID == null || redirectUrl == null) {
 			Log.v("iGreet", "iGreet: Invalid parameters for authorize");
 			throw new PeasClientAuthenticationException(

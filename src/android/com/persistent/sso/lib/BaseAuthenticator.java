@@ -22,9 +22,8 @@ public abstract class BaseAuthenticator {
 		this.pluginActivity = pluginActivity;
 	}
 
-	public void setParams(String baseUrl, String clientID, String secretKey,
+	public void setParams(String clientID, String secretKey,
 			String redirectUrl) {
-		this.baseUrl = baseUrl;
 		this.clientID = clientID;
 		this.secretKey = secretKey;
 		this.redirectUrl = redirectUrl;
