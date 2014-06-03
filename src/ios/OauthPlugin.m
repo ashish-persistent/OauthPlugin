@@ -32,17 +32,32 @@
 }
 
 
-- (void)getToken:(CDVInvokedUrlCommand *)cmd {
+- (void)peasAuthorize:(CDVInvokedUrlCommand *)cmd {
     command = cmd;
     NSDictionary *options = [cmd.arguments objectAtIndex:0];
     NSString *baseURL = [options objectForKey:@"baseUrl"];
     NSString *consumerKey = [options objectForKey:@"consumerKey"];
     NSString *secretKey = [options objectForKey:@"secretKey"];
     NSString *redirectUrl = [options objectForKey:@"redirectUrl"];
-
-    PEASOAuthLibrary *library = [[PEASOAuthLibrary alloc] initWithServerURl:baseURL  redirectURL:redirectUrl consumerKey:consumerKey andSecretKey:secretKey];
-    [library authenticateUserWithCallbackObject:self selector:@selector(loginSuccess:)];
+    
+    PEASOAuthLibrary *library = [[PEASOAuthLibrary alloc] initWithRedirectURL:redirectUrl consumerKey:consumerKey andSecretKey:secretKey];
+    [library authenticateUserWithPEASUrl:baseURL callbackObject:self selector:@selector(loginSuccess:)];
 }
+
+
+- (void)authorize:(CDVInvokedUrlCommand *)cmd {
+    
+    command = cmd;
+    NSDictionary *options = [cmd.arguments objectAtIndex:0];
+    NSString *baseURL = [options objectForKey:@"baseUrl"];
+    NSString *consumerKey = [options objectForKey:@"consumerKey"];
+    NSString *secretKey = [options objectForKey:@"secretKey"];
+    NSString *redirectUrl = [options objectForKey:@"redirectUrl"];
+    
+    PEASOAuthLibrary *library = [[PEASOAuthLibrary alloc] initWithRedirectURL:redirectUrl consumerKey:consumerKey andSecretKey:secretKey];
+    [library authenticateUserWithUrl:baseURL callbackObject:self selector:@selector(loginSuccess:)];
+}
+
 
 - (void)loginSuccess:(id)data {
     CDVPluginResult *pluginResult = [ CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:data];

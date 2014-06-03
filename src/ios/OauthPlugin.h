@@ -11,6 +11,7 @@
 @interface OauthPlugin : CDVPlugin
 
 
-- (void)getToken:(CDVInvokedUrlCommand *)command;
+- (void)peasAuthorize:(CDVInvokedUrlCommand *)command;
 - (void)enterpriseAuthorize:(CDVInvokedUrlCommand *)command;
+- (void)authorize:(CDVInvokedUrlCommand *)command;
 @end

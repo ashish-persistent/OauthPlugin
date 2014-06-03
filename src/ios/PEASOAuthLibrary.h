@@ -54,7 +54,7 @@
  * @return id : created oAuthmanager class object initializd with provided parameter.
  */
 
-- (id)initWithServerURl:(NSString*) strUrl redirectURL:(NSString*)schemeUrl consumerKey:(NSString*) consumersKey andSecretKey:(NSString*)secretkey;
+- (id)initWithRedirectURL:(NSString*)schemeUrl consumerKey:(NSString*) consumersKey andSecretKey:(NSString*)secretkey;
 
 /**
  * @fn     - (void)sendRequestForAccessTokenWithUrl:(NSURL*) url;
@@ -71,7 +71,8 @@
  * @param  selector : it is selector method in which access token is collected.
  * @return void.
  */
--(void)authenticateUserWithCallbackObject:(id)anObject selector:(SEL)selector;
+-(void)authenticateUserWithUrl:(NSString *)urlString callbackObject:(id)anObject selector:(SEL)selector;
+-(void)authenticateUserWithPEASUrl:(NSString *)urlString callbackObject:(id)anObject selector:(SEL)selector;
 
 /**
  * @fn     +(id) sharedInstance;

@@ -33,66 +33,89 @@ static PEASOAuthLibrary* manager = nil;
 @synthesize callbackSelector;
 
 
-- (id)initWithServerURl:(NSString*) strUrl redirectURL:(NSString*)schemeUrl consumerKey:(NSString*) consumersKey andSecretKey:(NSString*)secretkey {
+- (id)initWithRedirectURL:(NSString*)schemeUrl consumerKey:(NSString*) consumersKey andSecretKey:(NSString*)secretkey {
     if (manager == nil) {
         self = [super init];
         manager = self;
     }
-    if([strUrl hasSuffix:@"/"])
-    {
-        self.serverUrl = strUrl;
-    }
-    else
-    {
-        manager.serverUrl = [NSString stringWithFormat:@"%@/",strUrl];
-    }
-    
     manager.consumerKey = consumersKey;
     manager.secreteKey = secretkey;
     manager.redirectUri = [schemeUrl stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
-    NSURL *scheme = [NSURL URLWithString:manager.redirectUri];
-    
-    if (scheme && manager.redirectUri.length > 0) {
-        if (!scheme.scheme && !scheme.host) {
-            manager.redirectUri = [NSString stringWithFormat:@"%@://persistent",manager.redirectUri];
-        }
-        else if (!scheme.host)
-        {
-            manager.redirectUri = [NSString stringWithFormat:@"%@://persistent",manager.redirectUri];
-        }
-    }
-    NSLog(@"SCheme %@, Host %@ \n%@",scheme.scheme , scheme.host,self.redirectUri);
+//    NSURL *scheme = [NSURL URLWithString:manager.redirectUri];
+//    
+//    if (scheme && manager.redirectUri.length > 0) {
+//        if (!scheme.scheme && !scheme.host) {
+//            manager.redirectUri = [NSString stringWithFormat:@"%@://persistent",manager.redirectUri];
+//        }
+//        else if (!scheme.host)
+//        {
+//            manager.redirectUri = [NSString stringWithFormat:@"%@://persistent",manager.redirectUri];
+//        }
+//    }
+//    NSLog(@"SCheme %@, Host %@ \n%@",scheme.scheme , scheme.host,self.redirectUri);
 	return manager;
 }
 
-+(id) sharedInstance
-{
++(id) sharedInstance {
     if (manager == nil) {
         manager = [[PEASOAuthLibrary alloc] init];
     }
     return manager;
 }
 
-
--(void)authenticateUserWithCallbackObject:(id)anObject selector:(SEL)selector {
-	
-	
+- (NSString *)getSSOServerDetail {
+    NSString* trimedUrl = [self.serverUrl stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]];
+    NSString* path = [NSString stringWithFormat:@"%@/peas/ssourl",trimedUrl];
     
+    NSMutableURLRequest* urlReq = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:path]];
+    [urlReq setValue:@"peasappv2" forHTTPHeaderField:@"appid"];
+    NSError* e;
+    NSData* data= [NSURLConnection sendSynchronousRequest:urlReq returningResponse:nil error:&e];
+    NSDictionary* dicResponse = [NSJSONSerialization JSONObjectWithData:data options:
+                                 NSJSONReadingAllowFragments error:&e];
+    
+    NSLog(@"Error %@ and \n Response %@",e,dicResponse);
+    if (!e) {
+        return [dicResponse objectForKey:@"url"];
+        /* if ([dicResponse objectForKey:@"peasclient"] && self.serverUrl) {
+         self.consumerKey = [dicResponse objectForKey:@"peasclient"];
+         }
+         
+         if ([dicResponse objectForKey:@"peassecret"] && self.serverUrl) {
+         self.secreteKey = [dicResponse objectForKey:@"peassecret"];
+         }
+         */
+    }
+    return  nil;
+}
+
+
+
+- (void)authenticateUserWithPEASUrl:(NSString *)urlString callbackObject:(id)anObject selector:(SEL)selector {
+    self.serverUrl = urlString;
+    [self authenticateUserWithUrl:[self getSSOServerDetail] callbackObject:anObject selector:selector];
+}
+
+
+- (void)authenticateUserWithUrl:(NSString *)urlString callbackObject:(id)anObject selector:(SEL)selector {
     self.callbackObject = anObject;
 	self.callbackSelector = selector;
+    if(![urlString hasSuffix:@"/"]) {
+        urlString = [NSString stringWithFormat:@"%@/",urlString];
+    }
     if ([self validateAllOauthParameters]) {
-        //        http://abhiejit-test.apigee.net/v1/test/authorize?response_type=code&client_id={client_ID}&scope=READ&state=foobar&redirect_url={urlscheme}&deviceId={deviceId}&deviceOs={deviceOs}&deviceOsVersion={deviceOsVersion}&packageName={packageName}&apiName={apiName}
-        
-        //        NSString *url_string = [NSString stringWithFormat:@"http://abhiejit-test.apigee.net/v1/test/authorize?response_type=code&client_id=%@&scope=READ&state=%@&redirect_url=%@", self.consumerKey,[self getDeviceIdentifier], self.redirectUri];
         NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
+        NSString *url_string = [NSString stringWithFormat:@"%@authorize?response_type=code&client_id=%@&scope=READ&state=%@&deviceId=%@&deviceOs=%@&deviceOsVersion=%@&packageName=%@&apiName=%@&redirect_url=%@",urlString,self.consumerKey,self.serverUrl, [self getDeviceIdentifier],[self getDeviceOS], [self getDeviceOSVersion], bundleIdentifier, @"DummyApiName",self.redirectUri ];
         
-        NSString *url_string = [NSString stringWithFormat:@"%@authorize?response_type=code&client_id=%@&scope=READ&state=%@&redirect_url=%@&deviceId=%@&deviceOs=%@&deviceOsVersion=%@&packageName=%@&apiName=%@", self.serverUrl,self.consumerKey,[self getDeviceIdentifier], self.redirectUri,[self getDeviceIdentifier],[self getDeviceOS], [self getDeviceOSVersion], bundleIdentifier, @"DummyApiName"];
-        NSLog(@"Url: %@", url_string);
         NSURL *url = [NSURL URLWithString:url_string];
+        NSLog(@"Url: %@ and URL = %@", url_string ,url);
+        self.serverUrl = urlString;
         [[UIApplication sharedApplication] openURL:url];
     }
+
 }
+
 
 
 
@@ -113,16 +136,9 @@ static PEASOAuthLibrary* manager = nil;
     
 #endif
     
-//#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 60000
     NSString* udid = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     
     return udid;
-    
-//#else
-//    NSString* udid = [[UIDevice currentDevice] uniqueIdentifier]; //[[[UIDevice currentDevice] uniqueIdentifier] UUIDString];
-//    NSLog(@"UDID %@",udid);
-//    return udid;
-//#endif
 }
 
 
@@ -167,7 +183,7 @@ static PEASOAuthLibrary* manager = nil;
     
     NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&e];
     
-    NSString* response = [[NSString alloc] initWithData:data encoding:NSStringEncodingConversionAllowLossy];
+//    NSString* response = [[NSString alloc] initWithData:data encoding:NSStringEncodingConversionAllowLossy];
     
     //NSLog(@"RESPONSE %@",response);
     
