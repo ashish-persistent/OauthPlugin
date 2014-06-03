@@ -58,7 +58,7 @@
     NSRange range = [url rangeOfString:@":"];
     NSString *scheme = [url substringToIndex:range.location];
     
-    if([scheme isEqualToString:@"igreet_peas"]) {
+    if([scheme isEqualToString:@"igreetpeas"]) {
         [[PEASOAuthLibrary sharedInstance] sendRequestForAccessTokenWithUrl:notification.object];
     } else if([scheme isEqualToString:@"igreet"]) {
         [[EnterpriseOAuthLibrary sharedInstance] sendRequestForAccessTokenWithUrl:notification.object];
