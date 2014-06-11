@@ -1,5 +1,6 @@
 package com.persistent.sso.lib;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.persistent.sso.network.NetworkUtility;
+import com.persistent.sso.network.NetworkUtilityListener;
 
 public class PeasClientAuthenticator extends BaseAuthenticator {
 
@@ -37,10 +39,76 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 		super();
 	}
 
+	public void logout() throws PeasClientAuthenticationException {
+		
+		if(baseUrl == null) {
+			
+		} else {
+			String logoutURL = baseUrl + "/logout";
+			new LogoutAsyncTask(new PeasClientLogoutListener() {
+
+				@Override
+				public void onLogoutFailed(String reason) {
+					// TODO Auto-generated method stub
+
+				}
+
+				@Override
+				public void onLoggedOut() {
+					listener.onLogoutSuccess();
+					// TODO Auto-generated method stub
+
+				}
+			}, logoutURL, getIMEI()).execute();
+
+
+		}
+		
+//		baseUrl = url;
+//		if (baseUrl == null) {
+//			Log.v("iGreet", "iGreet: Invalid parameters for authorize");
+//			throw new PeasClientAuthenticationException(
+//					"Invalid parameters for authorize");
+//		}
+//
+//		new GetSsoUrkTaskt(baseUrl, new SsoUrlTaskListener() {
+//
+//			@Override
+//			public void onReceivedSsoUrl(String ssoUrl) {
+//				if (ssoUrl == null) {
+//					this.onFailure(null);
+//				} else {
+//					String logoutURL = ssoUrl + "/logout";
+//					new LogoutAsyncTask(new PeasClientLogoutListener() {
+//
+//						@Override
+//						public void onLogoutFailed(String reason) {
+//							// TODO Auto-generated method stub
+//
+//						}
+//
+//						@Override
+//						public void onLoggedOut() {
+//							listener.onLogoutSuccess();
+//							// TODO Auto-generated method stub
+//
+//						}
+//					}, logoutURL, getIMEI()).execute();
+//
+//				}
+//			}
+//
+//			@Override
+//			public void onFailure(String reason) {
+//				Log.w(TAG, TAG + ".authorize.onFailure()");
+//
+//			}
+//		}).execute();
+	}
 
 	public void authorize(String url) {
 		Log.v(TAG, "iGreet: authorize: " + url);
-		
+
 		final StringBuilder sb = new StringBuilder();
 		sb.append(url);
 
@@ -58,8 +126,8 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 		sb.append("&deviceOsVersion=");
 		sb.append(android.os.Build.VERSION.RELEASE);
 
-		sb.append("&packageName=");
-		sb.append(pluginActivity.getBaseContext().getPackageName());
+		sb.append("&packageName=com.persistentsys.surveyapp");
+//		sb.append(pluginActivity.getBaseContext().getPackageName());
 
 		sb.append("&apiName=DummyApiName");
 
@@ -77,7 +145,8 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 
 	}
 
-	public void peasAuthorize(String url) throws PeasClientAuthenticationException {
+	public void peasAuthorize(String url)
+			throws PeasClientAuthenticationException {
 		Log.v("iGreet", "iGreet: peasAuthorize");
 		baseUrl = url;
 		if (baseUrl == null || clientID == null || redirectUrl == null) {
@@ -149,6 +218,92 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 				.getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
 		return telephonymanager.getDeviceId();
 	}
+}
+
+class PeasNetworkHeaders {
+	private static final String CONTENT_TYPE = "Content-Type";
+
+
+	public PeasNetworkHeaders() {
+		super();
+	}
+
+	public Map<String, String> getLogoutRequestHeaders() {
+		final Map<String, String> headers = new HashMap<String, String>(1);
+		headers.put(CONTENT_TYPE, LogoutAsyncTask.CONTENT_TYPE_JSON);
+		return headers;
+	}
+
+}
+
+class LogoutAsyncTask extends AsyncTask<URL, Integer, String> {
+	private final PeasClientLogoutListener listener;
+
+	private static final String TAG = "LogoutAsyncTask";
+
+	public static final String KEY_DEVICE_ID = "deviceId";
+
+	public static final String CONTENT_TYPE_JSON = "application/json";
+
+	private final String url;
+	private final String deviceId;
+
+	public LogoutAsyncTask(final PeasClientLogoutListener logoutListener,
+			final String url, final String deviceId) {
+		this.listener = logoutListener;
+		this.url = url;
+		this.deviceId = deviceId;
+	}
+
+	@Override
+	protected String doInBackground(URL... params) {
+		Log.d(TAG, TAG + ".doInBackground()");
+
+		final NetworkUtility argHTTPClient = new NetworkUtility(
+				new LogoutApiListener(),
+				new PeasNetworkHeaders().getLogoutRequestHeaders());
+		argHTTPClient.setURL(url);
+		argHTTPClient.setRequestMethod(NetworkUtility.REQUEST_METHOD_POST);
+
+		final JSONObject obj = new JSONObject();
+		try {
+			obj.put(KEY_DEVICE_ID, deviceId);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		Log.d(TAG,
+				TAG + ".doInBackground(): submitting data = " + obj.toString());
+
+		argHTTPClient.setData(obj.toString().getBytes());
+
+		return argHTTPClient.sendRequest();
+	}
+
+	@Override
+	protected void onPostExecute(String error) {
+		Log.d(TAG, TAG + ".onPostExecute(): error string = " + error);
+	}
+
+	private class LogoutApiListener implements NetworkUtilityListener {
+
+		@Override
+		public boolean onSuccess(String message, Object response) {
+			if (listener != null) {
+				listener.onLoggedOut();
+			}
+			return false;
+		}
+
+		@Override
+		public void onFailure(String message, Object response) {
+			if (listener != null) {
+				listener.onLogoutFailed(message);
+			}
+		}
+
+	}
+
 }
 
 class GetSsoUrkTaskt extends AsyncTask<String, Void, String> {

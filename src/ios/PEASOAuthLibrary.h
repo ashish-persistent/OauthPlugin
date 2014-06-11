@@ -73,6 +73,7 @@
  */
 -(void)authenticateUserWithUrl:(NSString *)urlString callbackObject:(id)anObject selector:(SEL)selector;
 -(void)authenticateUserWithPEASUrl:(NSString *)urlString callbackObject:(id)anObject selector:(SEL)selector;
+- (void)logutUserWithCallbackObject:(id)anObject selector:(SEL)selector;
 
 /**
  * @fn     +(id) sharedInstance;

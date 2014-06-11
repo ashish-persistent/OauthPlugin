@@ -10,13 +10,11 @@ import com.persistent.sso.lib.EnterpriseAuthenticator;
 import com.persistent.sso.lib.PeasClientAuthenticator;
 import com.persistentsys.plugin.OAuthPluginListener;
 
-
-
-
 public class OauthPlugin extends CordovaPlugin {
 	public static final String ACTION_AUTHORIZE = "authorize";
 	public static final String ACTION_PEAS_AUTHORIZE = "peasAuthorize";
 	public static final String ACTION_ENTERPRISE_AUTHORIZE = "enterpriseAuthorize";
+	public static final String ACTION_PEAS_LOGOUT = "peasLogout";
 	public static final String TAG = OauthPlugin.class.getName();
 
 	@Override
@@ -27,61 +25,81 @@ public class OauthPlugin extends CordovaPlugin {
 		Log.v("iGreet", "iGreet: execute");
 
 		try {
-			JSONObject arg_object = args.getJSONObject(0);
-			String baseUrl = arg_object.getString("baseUrl");
-			String consumerKey = arg_object.getString("consumerKey");
-			String secretKey = arg_object.getString("secretKey");
-			String redirectUrl = arg_object.getString("redirectUrl");
-			Log.v(TAG, "iGreet:" + baseUrl + consumerKey + secretKey + redirectUrl + action);
-			
-			
-			
-			if(ACTION_ENTERPRISE_AUTHORIZE.equals(action)) {
-				EnterpriseAuthenticator authenticator = EnterpriseAuthenticator.getAuthenticationHandler();
+			String baseUrl = null,consumerKey = null, secretKey = null, redirectUrl = null;
+			if(!ACTION_PEAS_LOGOUT.equals(action)) {
+				JSONObject arg_object = args.getJSONObject(0);
+				baseUrl = arg_object.getString("baseUrl");
+				consumerKey = arg_object.getString("consumerKey");
+				secretKey = arg_object.getString("secretKey");
+				redirectUrl = arg_object.getString("redirectUrl");
+				
+			}
+			Log.v(TAG, "iGreet:" + baseUrl + consumerKey + secretKey
+					+ redirectUrl + action);
+
+			if (ACTION_ENTERPRISE_AUTHORIZE.equals(action)) {
+				EnterpriseAuthenticator authenticator = EnterpriseAuthenticator
+						.getAuthenticationHandler();
 				authenticator.setPluginActivity(this.cordova.getActivity());
 				authenticator.setParams(consumerKey, secretKey, redirectUrl);
 				authenticator.setListener(new OAuthPluginListener() {
-					
+
 					@Override
 					public void onSuccess(JSONObject tokenDetails) {
 						// TODO Auto-generated method stub
 						callbackContext.success(tokenDetails);
 						Log.v(TAG, "onSuccess: " + tokenDetails);
 					}
-					
+
 					@Override
 					public void onFail(String error) {
 						// TODO Auto-generated method stub
-						
+
+					}
+
+					@Override
+					public void onLogoutSuccess() {
+						// TODO Auto-generated method stub
+
 					}
 				});
 				authenticator.authorize(baseUrl);
 				return true;
 			} else {
-				
-				PeasClientAuthenticator authenticator = PeasClientAuthenticator.getAuthenticationHandler();
+
+				PeasClientAuthenticator authenticator = PeasClientAuthenticator
+						.getAuthenticationHandler();
 				authenticator.setPluginActivity(this.cordova.getActivity());
 				authenticator.setParams(consumerKey, secretKey, redirectUrl);
 				authenticator.setListener(new OAuthPluginListener() {
-					
+
 					@Override
 					public void onSuccess(JSONObject tokenDetails) {
 						// TODO Auto-generated method stub
 						callbackContext.success(tokenDetails);
 						Log.v(TAG, "onSuccess: " + tokenDetails);
 					}
-					
+
 					@Override
 					public void onFail(String error) {
 						// TODO Auto-generated method stub
-						
+
+					}
+
+					@Override
+					public void onLogoutSuccess() {
+						// TODO Auto-generated method stub
+						callbackContext.success();
 					}
 				});
 				if (ACTION_AUTHORIZE.equals(action)) {
 					authenticator.authorize(baseUrl);
 					return true;
-				} else if(ACTION_PEAS_AUTHORIZE.equals(action)) {
+				} else if (ACTION_PEAS_AUTHORIZE.equals(action)) {
 					authenticator.peasAuthorize(baseUrl);
+					return true;
+				} else if (ACTION_PEAS_LOGOUT.equals(action)) {
+					authenticator.logout();
 					return true;
 				}
 			}

@@ -68,6 +68,7 @@ version="1.0.0">
 		<source-file src="src/android/com/persistent/sso/lib/PeasClientAuthenticator.java" target-dir="src/android/com/persistent/sso/lib/" />
 		<source-file src="src/android/com/persistent/sso/lib/BaseAuthenticator.java" target-dir="src/android/com/persistent/sso/lib/" />
 		<source-file src="src/android/com/persistent/sso/lib/EnterpriseAuthenticator.java" target-dir="src/android/com/persistent/sso/lib/" />
+		<source-file src="src/android/com/persistent/sso/lib/PeasClientLogoutListener.java" target-dir="src/android/com/persistent/sso/lib/" />
 		
 		<source-file src="src/android/com/persistent/sso/network/NetworkUtility.java" target-dir="src/android/com/persistent/sso/network/" />
 		<source-file src="src/android/com/persistent/sso/network/NetworkUtilityListener.java" target-dir="src/android/com/persistent/sso/network/" />

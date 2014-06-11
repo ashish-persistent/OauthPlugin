@@ -41,19 +41,6 @@ static PEASOAuthLibrary* manager = nil;
     manager.consumerKey = consumersKey;
     manager.secreteKey = secretkey;
     manager.redirectUri = [schemeUrl stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
-//    NSURL *scheme = [NSURL URLWithString:manager.redirectUri];
-//    
-//    if (scheme && manager.redirectUri.length > 0) {
-//        if (!scheme.scheme && !scheme.host) {
-//            manager.redirectUri = [NSString stringWithFormat:@"%@://persistent",manager.redirectUri];
-//        }
-//        else if (!scheme.host)
-//        {
-//            manager.redirectUri = [NSString stringWithFormat:@"%@://persistent",manager.redirectUri];
-//        }
-//    }
-//    NSLog(@"SCheme %@, Host %@ \n%@",scheme.scheme , scheme.host,self.redirectUri);
 	return manager;
 }
 
@@ -92,6 +79,44 @@ static PEASOAuthLibrary* manager = nil;
 
 
 
+- (void)logutUserWithCallbackObject:(id)anObject selector:(SEL)selector {
+    NSString* trimedUrl = [self.serverUrl stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]];
+    NSString* strUrl = [NSString stringWithFormat:@"%@/logout",trimedUrl];
+    NSMutableURLRequest* urlReq = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:strUrl]];
+    [urlReq setHTTPMethod:@"POST"];
+    NSString *postString = [NSString stringWithFormat:@"{ deviceId : \"%@\"}",[self getDeviceIdentifier]];
+    [urlReq setHTTPBody:[postString dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    
+    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+    [NSURLConnection sendAsynchronousRequest:urlReq queue:queue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+        if (connectionError) {
+            //            Got error in fetchning the response from server
+            dispatch_async(dispatch_get_main_queue(), ^(void){
+                
+                NSLog(@"Logout faild");
+            });
+        }
+        else {
+            NSError* e;
+            NSDictionary* dicResponse = [NSJSONSerialization JSONObjectWithData:data options:
+                                         NSJSONReadingAllowFragments error:&e];
+            if (e) {
+                //  Got error in Parsing the response
+                dispatch_async(dispatch_get_main_queue(), ^(void){
+                    NSLog(@"Logout faild");
+                });
+            }
+            else {
+                dispatch_async(dispatch_get_main_queue(), ^(void){
+                    [anObject performSelectorInBackground:selector withObject:dicResponse];
+                });
+            }
+        }
+    }];
+}
+
+
 - (void)authenticateUserWithPEASUrl:(NSString *)urlString callbackObject:(id)anObject selector:(SEL)selector {
     self.serverUrl = urlString;
     [self authenticateUserWithUrl:[self getSSOServerDetail] callbackObject:anObject selector:selector];
@@ -113,7 +138,7 @@ static PEASOAuthLibrary* manager = nil;
         self.serverUrl = urlString;
         [[UIApplication sharedApplication] openURL:url];
     }
-
+    
 }
 
 
@@ -183,7 +208,7 @@ static PEASOAuthLibrary* manager = nil;
     
     NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&e];
     
-//    NSString* response = [[NSString alloc] initWithData:data encoding:NSStringEncodingConversionAllowLossy];
+    //    NSString* response = [[NSString alloc] initWithData:data encoding:NSStringEncodingConversionAllowLossy];
     
     //NSLog(@"RESPONSE %@",response);
     

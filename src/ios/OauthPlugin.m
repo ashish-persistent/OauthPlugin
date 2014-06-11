@@ -59,6 +59,22 @@
 }
 
 
+- (void)peasLogout:(CDVInvokedUrlCommand *)cmd {
+    command = cmd;
+    PEASOAuthLibrary *library = [PEASOAuthLibrary sharedInstance];
+    [library logutUserWithCallbackObject:self selector:@selector(logoutSuccess:)];
+}
+
+
+- (void)logoutSuccess:(id)data {
+    CDVPluginResult *pluginResult = [ CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:data];
+    [pluginResult setKeepCallbackAsBool:YES];
+    if(command) {
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }
+}
+
+
 - (void)loginSuccess:(id)data {
     CDVPluginResult *pluginResult = [ CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:data];
     [pluginResult setKeepCallbackAsBool:YES];
@@ -73,10 +89,10 @@
     NSRange range = [url rangeOfString:@":"];
     NSString *scheme = [url substringToIndex:range.location];
     
-    if([scheme isEqualToString:@"igreetpeas"]) {
-        [[PEASOAuthLibrary sharedInstance] sendRequestForAccessTokenWithUrl:notification.object];
-    } else if([scheme isEqualToString:@"igreet"]) {
+    if([scheme isEqualToString:@"igreet"]) {
         [[EnterpriseOAuthLibrary sharedInstance] sendRequestForAccessTokenWithUrl:notification.object];
+    } else {
+        [[PEASOAuthLibrary sharedInstance] sendRequestForAccessTokenWithUrl:notification.object];
     }
 
 }
