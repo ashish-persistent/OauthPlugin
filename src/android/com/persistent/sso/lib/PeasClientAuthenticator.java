@@ -23,7 +23,8 @@ import com.persistent.sso.network.NetworkUtilityListener;
 public class PeasClientAuthenticator extends BaseAuthenticator {
 
 	static final String HEADER_KEY_SSO_API_APPID = "appid";
-	static final String HEADER_VALUE_SSO_API_APPID = "peasappv2";
+	//static final String HEADER_VALUE_SSO_API_APPID = "peasappv2";
+	static final String HEADER_VALUE_SSO_API_APPID = "peasappv3.1";
 
 	public static PeasClientAuthenticator getAuthenticationHandler() {
 
