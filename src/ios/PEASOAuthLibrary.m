@@ -56,7 +56,8 @@ static PEASOAuthLibrary* manager = nil;
     NSString* path = [NSString stringWithFormat:@"%@/peas/ssourl",trimedUrl];
     
     NSMutableURLRequest* urlReq = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:path]];
-    [urlReq setValue:@"peasappv2" forHTTPHeaderField:@"appid"];
+    /*[urlReq setValue:@"peasappv2" forHTTPHeaderField:@"appid"];*/
+    [urlReq setValue:@"peasappv3.1" forHTTPHeaderField:@"appid"];
     NSError* e;
     NSData* data= [NSURLConnection sendSynchronousRequest:urlReq returningResponse:nil error:&e];
     NSDictionary* dicResponse = [NSJSONSerialization JSONObjectWithData:data options:
