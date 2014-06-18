@@ -170,9 +170,6 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 			@Override
 			public void onFailure(String reason) {
 				Log.w(TAG, TAG + ".authorize.onFailure()");
-				throw new PeasClientAuthenticationException(
-					"Could not get SSO URL");
-
 			}
 		}).execute();
 
