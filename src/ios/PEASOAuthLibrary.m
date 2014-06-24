@@ -56,7 +56,6 @@ static PEASOAuthLibrary* manager = nil;
     NSString* path = [NSString stringWithFormat:@"%@/peas/ssourl",trimedUrl];
     
     NSMutableURLRequest* urlReq = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:path]];
-    /*[urlReq setValue:@"peasappv2" forHTTPHeaderField:@"appid"];*/
     [urlReq setValue:@"peasappv3.1" forHTTPHeaderField:@"appid"];
     NSError* e;
     NSData* data= [NSURLConnection sendSynchronousRequest:urlReq returningResponse:nil error:&e];
@@ -85,6 +84,7 @@ static PEASOAuthLibrary* manager = nil;
 - (void)logutUserWithCallbackObject:(id)anObject selector:(SEL)selector {
     NSString* trimedUrl = [self.serverUrl stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]];
     NSString* strUrl = [NSString stringWithFormat:@"%@/logout",trimedUrl];
+    NSLog(@"oAuth Logout Url: %@", strUrl);
     NSMutableURLRequest* urlReq = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:strUrl]];
     [urlReq setHTTPMethod:@"POST"];
     NSString *postString = [NSString stringWithFormat:@"{ deviceId : \"%@\"}",[self getDeviceIdentifier]];
@@ -112,6 +112,7 @@ static PEASOAuthLibrary* manager = nil;
             }
             else {
                 dispatch_async(dispatch_get_main_queue(), ^(void){
+                    NSLog(@"Logout success");
                     [anObject performSelectorInBackground:selector withObject:dicResponse];
                 });
             }
