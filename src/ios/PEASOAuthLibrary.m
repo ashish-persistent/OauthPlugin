@@ -80,6 +80,8 @@ static PEASOAuthLibrary* manager = nil;
 
 
 
+
+
 - (void)logutUserWithCallbackObject:(id)anObject selector:(SEL)selector {
     NSString* trimedUrl = [self.serverUrl stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]];
     NSString* strUrl = [NSString stringWithFormat:@"%@/logout",trimedUrl];
@@ -87,7 +89,7 @@ static PEASOAuthLibrary* manager = nil;
     [urlReq setHTTPMethod:@"POST"];
     NSString *postString = [NSString stringWithFormat:@"{ deviceId : \"%@\"}",[self getDeviceIdentifier]];
     [urlReq setHTTPBody:[postString dataUsingEncoding:NSUTF8StringEncoding]];
-    
+    [urlReq setValue:@"peasappv3.1" forHTTPHeaderField:@"appid"];
     
     NSOperationQueue *queue = [[NSOperationQueue alloc] init];
     [NSURLConnection sendAsynchronousRequest:urlReq queue:queue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
