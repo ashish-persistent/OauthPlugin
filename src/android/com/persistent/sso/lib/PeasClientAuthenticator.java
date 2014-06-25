@@ -23,8 +23,9 @@ import com.persistent.sso.network.NetworkUtilityListener;
 public class PeasClientAuthenticator extends BaseAuthenticator {
 
 	static final String HEADER_KEY_SSO_API_APPID = "appid";
-	//static final String HEADER_VALUE_SSO_API_APPID = "peasappv2";
 	static final String HEADER_VALUE_SSO_API_APPID = "peasappv3.1";
+	static final String CONTENT_TYPE 		= "Content-Type" ;
+
 
 	public static PeasClientAuthenticator getAuthenticationHandler() {
 
@@ -65,46 +66,6 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 
 		}
 		
-//		baseUrl = url;
-//		if (baseUrl == null) {
-//			Log.v("iGreet", "iGreet: Invalid parameters for authorize");
-//			throw new PeasClientAuthenticationException(
-//					"Invalid parameters for authorize");
-//		}
-//
-//		new GetSsoUrkTaskt(baseUrl, new SsoUrlTaskListener() {
-//
-//			@Override
-//			public void onReceivedSsoUrl(String ssoUrl) {
-//				if (ssoUrl == null) {
-//					this.onFailure(null);
-//				} else {
-//					String logoutURL = ssoUrl + "/logout";
-//					new LogoutAsyncTask(new PeasClientLogoutListener() {
-//
-//						@Override
-//						public void onLogoutFailed(String reason) {
-//							// TODO Auto-generated method stub
-//
-//						}
-//
-//						@Override
-//						public void onLoggedOut() {
-//							listener.onLogoutSuccess();
-//							// TODO Auto-generated method stub
-//
-//						}
-//					}, logoutURL, getIMEI()).execute();
-//
-//				}
-//			}
-//
-//			@Override
-//			public void onFailure(String reason) {
-//				Log.w(TAG, TAG + ".authorize.onFailure()");
-//
-//			}
-//		}).execute();
 	}
 
 	public void authorize(String url) {
@@ -170,6 +131,7 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 			@Override
 			public void onFailure(String reason) {
 				Log.w(TAG, TAG + ".authorize.onFailure()");
+
 			}
 		}).execute();
 
@@ -259,24 +221,27 @@ class LogoutAsyncTask extends AsyncTask<URL, Integer, String> {
 	protected String doInBackground(URL... params) {
 		Log.d(TAG, TAG + ".doInBackground()");
 
-		final NetworkUtility argHTTPClient = new NetworkUtility(
-				new LogoutApiListener(),
-				new PeasNetworkHeaders().getLogoutRequestHeaders());
+		final Map<String, String> headers = new HashMap<String, String>(1);
+		headers.put(PeasClientAuthenticator.HEADER_KEY_SSO_API_APPID,
+				PeasClientAuthenticator.HEADER_VALUE_SSO_API_APPID);
+
+		headers.put( PeasClientAuthenticator.CONTENT_TYPE, 	CONTENT_TYPE_JSON );
+		
+		final NetworkUtility argHTTPClient 	= new NetworkUtility( new LogoutApiListener(),  headers);
 		argHTTPClient.setURL(url);
 		argHTTPClient.setRequestMethod(NetworkUtility.REQUEST_METHOD_POST);
-
+		
 		final JSONObject obj = new JSONObject();
 		try {
-			obj.put(KEY_DEVICE_ID, deviceId);
+			obj.put( KEY_DEVICE_ID , deviceId);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-
-		Log.d(TAG,
-				TAG + ".doInBackground(): submitting data = " + obj.toString());
-
+		
+		Log.d( TAG, TAG+".doInBackground(): submitting data = "+obj.toString()); 
+		
 		argHTTPClient.setData(obj.toString().getBytes());
-
+		
 		return argHTTPClient.sendRequest();
 	}
 
