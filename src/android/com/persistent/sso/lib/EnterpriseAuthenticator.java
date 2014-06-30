@@ -73,25 +73,27 @@ public class EnterpriseAuthenticator extends BaseAuthenticator {
 		Log.v(TAG, "iGreet: " + authCode);
 		if (baseUrl == null || clientID == null || secretKey == null
 				|| authCode == null || redirectUrl == null) {
-			throw new PeasClientAuthenticationException(
-					"Invalid clientID or Secret or authCode");
+			 Log.v("iGreet", "iGreet: Invalid clientID or Secret or authCode");
+			 listener.onFail("Error in login");
+		} else {
+			new RequestAcessTokenTask(clientID, secretKey, authCode, baseUrl,
+					redirectUrl, new PeasClientAuthenticationTokenListener() {
+				
+				@Override
+				public void onTokenReceived(JSONObject authResponse) {
+					listener.onSuccess(authResponse);
+					
+				}
+				
+				@Override
+				public void onTokenNotReceived() {
+					listener.onFail("Error in getting token");
+					// TODO Auto-generated method stub
+					
+				}
+			}).execute();
 		}
 
-		new RequestAcessTokenTask(clientID, secretKey, authCode, baseUrl,
-				redirectUrl, new PeasClientAuthenticationTokenListener() {
-
-					@Override
-					public void onTokenReceived(JSONObject authResponse) {
-						listener.onSuccess(authResponse);
-
-					}
-
-					@Override
-					public void onTokenNotReceived() {
-						// TODO Auto-generated method stub
-
-					}
-				}).execute();
 	}
 }
 

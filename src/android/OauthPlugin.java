@@ -25,14 +25,14 @@ public class OauthPlugin extends CordovaPlugin {
 		Log.v("iGreet", "iGreet: execute");
 
 		try {
-			String baseUrl = null,consumerKey = null, secretKey = null, redirectUrl = null;
-			if(!ACTION_PEAS_LOGOUT.equals(action)) {
+			String baseUrl = null, consumerKey = null, secretKey = null, redirectUrl = null;
+			if (!ACTION_PEAS_LOGOUT.equals(action)) {
 				JSONObject arg_object = args.getJSONObject(0);
 				baseUrl = arg_object.getString("baseUrl");
 				consumerKey = arg_object.getString("consumerKey");
 				secretKey = arg_object.getString("secretKey");
 				redirectUrl = arg_object.getString("redirectUrl");
-				
+
 			}
 			Log.v(TAG, "iGreet:" + baseUrl + consumerKey + secretKey
 					+ redirectUrl + action);
@@ -53,7 +53,7 @@ public class OauthPlugin extends CordovaPlugin {
 
 					@Override
 					public void onFail(String error) {
-						// TODO Auto-generated method stub
+						callbackContext.error(error);
 
 					}
 
@@ -82,6 +82,7 @@ public class OauthPlugin extends CordovaPlugin {
 
 					@Override
 					public void onFail(String error) {
+						callbackContext.error(error);
 						// TODO Auto-generated method stub
 
 					}
