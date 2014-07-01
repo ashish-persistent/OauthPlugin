@@ -81,21 +81,31 @@ static EnterpriseOAuthLibrary* manager = nil;
 
 
 - (void)sendRequestForAccessTokenWithUrl:(NSURL*) url {
-    NSDictionary *dict = [self parseQueryString:[url query]];
-    NSString* responseCode = [dict objectForKey:KRESPOSECODE];
     
-    NSString* encodedCode = [self base64String:[NSString stringWithFormat:@"%@:%@",self.consumerKey,self.secreteKey]]; //Consumer key:Secret Key
-//    https://pi-api.persistent.co.in:9443/v1/oauth2/token?grant_type=authorization_code&scope=Read&code=ZbdDSJVK&client_id=BW1ybSTIvu2Lr3UHJIbNeYqf7jl62sq4&redirect_uri=igreet://oauthcallback
-    NSString* strServerUrl = [NSString stringWithFormat:@"%@token?code=%@&grant_type=authorization_code&scope=Read&redirect_uri=%@&client_id=%@",self.serverUrl,responseCode,self.redirectUri, self.consumerKey];
-    NSURL* serverUrlrl = [NSURL URLWithString:strServerUrl];
-    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:serverUrlrl];
-    [request setHTTPMethod:@"POST"];
-    [request addValue:[NSString stringWithFormat:@"Basic %@",encodedCode] forHTTPHeaderField:@"Authorization"];
-    NSError* e;
-    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&e];
+    @try {
+        NSDictionary *dict = [self parseQueryString:[url query]];
+        NSString* responseCode = [dict objectForKey:KRESPOSECODE];
+        
+        
+        NSString* encodedCode = [self base64String:[NSString stringWithFormat:@"%@:%@",self.consumerKey,self.secreteKey]]; //Consumer key:Secret Key
+        //    https://pi-api.persistent.co.in:9443/v1/oauth2/token?grant_type=authorization_code&scope=Read&code=ZbdDSJVK&client_id=BW1ybSTIvu2Lr3UHJIbNeYqf7jl62sq4&redirect_uri=igreet://oauthcallback
+        NSString* strServerUrl = [NSString stringWithFormat:@"%@token?code=%@&grant_type=authorization_code&scope=Read&redirect_uri=%@&client_id=%@",self.serverUrl,responseCode,self.redirectUri, self.consumerKey];
+        NSURL* serverUrlrl = [NSURL URLWithString:strServerUrl];
+        NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:serverUrlrl];
+        [request setHTTPMethod:@"POST"];
+        [request addValue:[NSString stringWithFormat:@"Basic %@",encodedCode] forHTTPHeaderField:@"Authorization"];
+        NSError* e;
+        NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&e];
+        
+        NSDictionary* dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&e];
+        [self.callbackObject performSelectorInBackground:self.callbackSelector withObject:dic];
+    }
     
-    NSDictionary* dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&e];
-    [self.callbackObject performSelectorInBackground:self.callbackSelector withObject:dic];
+    @catch (NSException *e) {
+        [self.callbackObject performSelectorInBackground:self.callbackSelector withObject:[NSDictionary dictionary]];
+
+    }
+    
 }
 
 
