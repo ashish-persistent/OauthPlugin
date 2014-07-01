@@ -24,8 +24,7 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 
 	static final String HEADER_KEY_SSO_API_APPID = "appid";
 	static final String HEADER_VALUE_SSO_API_APPID = "peasappv3.1";
-	static final String CONTENT_TYPE 		= "Content-Type" ;
-
+	static final String CONTENT_TYPE = "Content-Type";
 
 	public static PeasClientAuthenticator getAuthenticationHandler() {
 
@@ -42,9 +41,9 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 	}
 
 	public void logout() throws PeasClientAuthenticationException {
-		
-		if(baseUrl == null) {
-			
+
+		if (baseUrl == null) {
+
 		} else {
 			String logoutURL = baseUrl + "/logout";
 			new LogoutAsyncTask(new PeasClientLogoutListener() {
@@ -63,9 +62,8 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 				}
 			}, logoutURL, getIMEI()).execute();
 
-
 		}
-		
+
 	}
 
 	public void authorize(String url) {
@@ -89,7 +87,7 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 		sb.append(android.os.Build.VERSION.RELEASE);
 
 		sb.append("&packageName=com.persistentsys.surveyapp");
-//		sb.append(pluginActivity.getBaseContext().getPackageName());
+		// sb.append(pluginActivity.getBaseContext().getPackageName());
 
 		sb.append("&apiName=DummyApiName");
 
@@ -154,8 +152,7 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 		Log.v("iGreet", "iGreet: " + authCode);
 		if (baseUrl == null || clientID == null || secretKey == null
 				|| authCode == null || redirectUrl == null) {
-			throw new PeasClientAuthenticationException(
-					"Invalid clientID or Secret or authCode");
+			listener.onFail("Error in login");
 		}
 
 		new SendAcessTokenRequestTask(clientID, secretKey, authCode, baseUrl,
@@ -169,6 +166,7 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 
 					@Override
 					public void onTokenNotReceived() {
+						listener.onFail("Error in getting token");
 						// TODO Auto-generated method stub
 
 					}
@@ -184,7 +182,6 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 
 class PeasNetworkHeaders {
 	private static final String CONTENT_TYPE = "Content-Type";
-
 
 	public PeasNetworkHeaders() {
 		super();
@@ -225,23 +222,25 @@ class LogoutAsyncTask extends AsyncTask<URL, Integer, String> {
 		headers.put(PeasClientAuthenticator.HEADER_KEY_SSO_API_APPID,
 				PeasClientAuthenticator.HEADER_VALUE_SSO_API_APPID);
 
-		headers.put( PeasClientAuthenticator.CONTENT_TYPE, 	CONTENT_TYPE_JSON );
-		
-		final NetworkUtility argHTTPClient 	= new NetworkUtility( new LogoutApiListener(),  headers);
+		headers.put(PeasClientAuthenticator.CONTENT_TYPE, CONTENT_TYPE_JSON);
+
+		final NetworkUtility argHTTPClient = new NetworkUtility(
+				new LogoutApiListener(), headers);
 		argHTTPClient.setURL(url);
 		argHTTPClient.setRequestMethod(NetworkUtility.REQUEST_METHOD_POST);
-		
+
 		final JSONObject obj = new JSONObject();
 		try {
-			obj.put( KEY_DEVICE_ID , deviceId);
+			obj.put(KEY_DEVICE_ID, deviceId);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
-		Log.d( TAG, TAG+".doInBackground(): submitting data = "+obj.toString()); 
-		
+
+		Log.d(TAG,
+				TAG + ".doInBackground(): submitting data = " + obj.toString());
+
 		argHTTPClient.setData(obj.toString().getBytes());
-		
+
 		return argHTTPClient.sendRequest();
 	}
 
