@@ -66,6 +66,15 @@
 }
 
 
+- (void)enterpriseLogout:(CDVInvokedUrlCommand *)cmd {
+    command = cmd;
+    NSDictionary *options = [cmd.arguments objectAtIndex:0];
+    NSString *baseURL = [options objectForKey:@"baseUrl"];
+
+    EnterpriseOAuthLibrary *library = [EnterpriseOAuthLibrary sharedInstance];
+    [library logutUserWithCallbackObject:self selector:@selector(logoutSuccess:) andUrl:baseURL];
+}
+
 - (void)logoutSuccess:(id)data {
     CDVPluginResult *pluginResult = [ CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:data];
     [pluginResult setKeepCallbackAsBool:YES];

@@ -109,6 +109,29 @@ static EnterpriseOAuthLibrary* manager = nil;
 }
 
 
+- (void)logutUserWithCallbackObject:(id)anObject selector:(SEL)selector andUrl:(NSString *)url {
+    
+    @try {
+        NSURL* serverUrlrl = [NSURL URLWithString:url];
+        NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:serverUrlrl];
+        [request setHTTPMethod:@"DELETE"];
+        NSString* encodedCode = [self base64String:[NSString stringWithFormat:@"%@:%@",self.consumerKey,self.secreteKey]]; //Consumer key:Secret Key
+        [request addValue:[NSString stringWithFormat:@"Basic %@", encodedCode] forHTTPHeaderField:@"Authorization"];
+        NSError* e;
+        NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&e];
+        NSDictionary* dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&e];
+        [self.callbackObject performSelectorInBackground:self.callbackSelector withObject:dic];
+    }
+    
+    @catch (NSException *e) {
+        [self.callbackObject performSelectorInBackground:self.callbackSelector withObject:[NSDictionary dictionary]];
+        
+    }
+
+    
+}
+
+
 - (NSDictionary *)parseQueryString:(NSString *)query {
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:6];
     NSArray *pairs = [query componentsSeparatedByString:@"&"];
