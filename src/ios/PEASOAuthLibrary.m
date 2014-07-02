@@ -87,9 +87,10 @@ static PEASOAuthLibrary* manager = nil;
     NSLog(@"oAuth Logout Url: %@", strUrl);
     NSMutableURLRequest* urlReq = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:strUrl]];
     [urlReq setHTTPMethod:@"POST"];
-    NSString *postString = [NSString stringWithFormat:@"{ deviceId : \"%@\"}",[self getDeviceIdentifier]];
+    NSString *postString = [NSString stringWithFormat:@"{\"deviceId\":\"%@\"}",[self getDeviceIdentifier]];
     [urlReq setHTTPBody:[postString dataUsingEncoding:NSUTF8StringEncoding]];
     [urlReq setValue:@"peasappv3.1" forHTTPHeaderField:@"appid"];
+    [urlReq setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     
     NSOperationQueue *queue = [[NSOperationQueue alloc] init];
     [NSURLConnection sendAsynchronousRequest:urlReq queue:queue completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
