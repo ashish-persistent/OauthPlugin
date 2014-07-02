@@ -197,41 +197,28 @@ static PEASOAuthLibrary* manager = nil;
 }
 
 
-- (void)sendRequestForAccessTokenWithUrl:(NSURL*) url
-{
-    NSDictionary *dict = [self parseQueryString:[url query]];
-    NSString* responseCode = [dict objectForKey:KRESPOSECODE];
+- (void)sendRequestForAccessTokenWithUrl:(NSURL*) url {
     
-    NSString* encodedCode = [self base64String:[NSString stringWithFormat:@"%@:%@",self.consumerKey,self.secreteKey]]; //Consumer key:Secret Key
-    //    http://abhiejit-test.apigee.net/v1/test/token?code=%@&grant_type=authorization_code&response_type=code&redirect_uri=%@
-    NSString* strServerUrl = [NSString stringWithFormat:@"%@token?code=%@&grant_type=authorization_code&response_type=code&redirect_uri=%@",self.serverUrl,responseCode,self.redirectUri];
-    NSURL* serverUrlrl = [NSURL URLWithString:strServerUrl];
-    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:serverUrlrl];
-    [request addValue:[NSString stringWithFormat:@"Basic %@",encodedCode] forHTTPHeaderField:@"Authorization"];
-    NSError* e;
+    @try {
+        
+        NSDictionary *dict = [self parseQueryString:[url query]];
+        NSString* responseCode = [dict objectForKey:KRESPOSECODE];
+        
+        NSString* encodedCode = [self base64String:[NSString stringWithFormat:@"%@:%@",self.consumerKey,self.secreteKey]]; //Consumer key:Secret Key
+        NSString* strServerUrl = [NSString stringWithFormat:@"%@token?code=%@&grant_type=authorization_code&response_type=code&redirect_uri=%@",self.serverUrl,responseCode,self.redirectUri];
+        NSURL* serverUrlrl = [NSURL URLWithString:strServerUrl];
+        NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:serverUrlrl];
+        [request addValue:[NSString stringWithFormat:@"Basic %@",encodedCode] forHTTPHeaderField:@"Authorization"];
+        NSError* e;
+        
+        NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&e];
+        NSDictionary* dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&e];
+        [self.callbackObject performSelectorInBackground:self.callbackSelector withObject:dic];
+    }
+    @catch (NSException *exception) {
+        [self.callbackObject performSelectorInBackground:self.callbackSelector withObject:[NSDictionary dictionary]];
+    }
     
-    NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&e];
-    
-    //    NSString* response = [[NSString alloc] initWithData:data encoding:NSStringEncodingConversionAllowLossy];
-    
-    //NSLog(@"RESPONSE %@",response);
-    
-    NSDictionary* dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&e];
-    
-    
-    /*
-     *************** Test access Token **********
-     request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://abhiejit-test.apigee.net/v1/test/names"]];
-     [request addValue:[NSString stringWithFormat:@"Bearer %@",[dic objectForKey:@"access_token"]] forHTTPHeaderField:@"Authorization"];
-     
-     NSData* data2 = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&e];
-     
-     NSString* response2 = [[NSString alloc] initWithData:data2 encoding:NSStringEncodingConversionAllowLossy];
-     
-     NSLog(@"RESPONSE2 %@",response2);
-     */
-    
-    [self.callbackObject performSelectorInBackground:self.callbackSelector withObject:dic];
 }
 
 
