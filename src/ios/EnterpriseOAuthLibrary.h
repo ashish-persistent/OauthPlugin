@@ -22,7 +22,7 @@
 - (id)initWithServerURl:(NSString*)strUrl redirectURL:(NSString*)schemeUrl consumerKey:(NSString*)consumersKey andSecretKey:(NSString*)secretkey;
 - (void)sendRequestForAccessTokenWithUrl:(NSURL*) url;
 - (void)authenticateUserWithCallbackObject:(id)anObject selector:(SEL)selector;
-- (void)logutUserWithCallbackObject:(id)anObject selector:(SEL)selector andUrl:(NSString *)url;
+- (void)logutUserWithUrl:(NSString *)url;
 
 + (id)sharedInstance;
 

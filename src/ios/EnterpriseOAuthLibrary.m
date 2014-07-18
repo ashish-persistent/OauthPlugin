@@ -41,19 +41,19 @@ static EnterpriseOAuthLibrary* manager = nil;
     manager.consumerKey = consumersKey;
     manager.secreteKey = secretkey;
     manager.redirectUri = [schemeUrl stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-//    manager.redirectUri = [schemeUrl stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-//    NSURL *scheme = [NSURL URLWithString:manager.redirectUri];
-//    
-//    if (scheme && manager.redirectUri.length > 0) {
-//        if (!scheme.scheme && !scheme.host) {
-//            manager.redirectUri = [NSString stringWithFormat:@"%@://oauthcallback",manager.redirectUri];
-//        }
-//        else if (!scheme.host)
-//        {
-//            manager.redirectUri = [NSString stringWithFormat:@"%@://oauthcallback",manager.redirectUri];
-//        }
-//    }
-//    NSLog(@"SCheme %@, Host %@ \n%@",scheme.scheme , scheme.host,self.redirectUri);
+    //    manager.redirectUri = [schemeUrl stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    //    NSURL *scheme = [NSURL URLWithString:manager.redirectUri];
+    //
+    //    if (scheme && manager.redirectUri.length > 0) {
+    //        if (!scheme.scheme && !scheme.host) {
+    //            manager.redirectUri = [NSString stringWithFormat:@"%@://oauthcallback",manager.redirectUri];
+    //        }
+    //        else if (!scheme.host)
+    //        {
+    //            manager.redirectUri = [NSString stringWithFormat:@"%@://oauthcallback",manager.redirectUri];
+    //        }
+    //    }
+    //    NSLog(@"SCheme %@, Host %@ \n%@",scheme.scheme , scheme.host,self.redirectUri);
 	return manager;
 }
 
@@ -69,7 +69,7 @@ static EnterpriseOAuthLibrary* manager = nil;
     self.callbackObject = anObject;
 	self.callbackSelector = selector;
     if ([self validateAllOauthParameters]) {
-//        https://pi-api.persistent.co.in:9443/v1/oauth2/authorize?response_type=code&client_id=BW1ybSTIvu2Lr3UHJIbNeYqf7jl62sq4&scope=Read&redirect_uri=igreet://oauthcallback
+        //        https://pi-api.persistent.co.in:9443/v1/oauth2/authorize?response_type=code&client_id=BW1ybSTIvu2Lr3UHJIbNeYqf7jl62sq4&scope=Read&redirect_uri=igreet://oauthcallback
         NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
         NSString *url_string = [NSString stringWithFormat:@"%@authorize?response_type=code&client_id=%@&scope=Read&state=%@&redirect_uri=%@",self.serverUrl, self.consumerKey, bundleIdentifier, self.redirectUri ];
         NSURL *url = [NSURL URLWithString:url_string];
@@ -103,13 +103,13 @@ static EnterpriseOAuthLibrary* manager = nil;
     
     @catch (NSException *e) {
         [self.callbackObject performSelectorInBackground:self.callbackSelector withObject:[NSDictionary dictionary]];
-
+        
     }
     
 }
 
 
-- (void)logutUserWithCallbackObject:(id)anObject selector:(SEL)selector andUrl:(NSString *)url {
+- (void)logutUserWithUrl:(NSString *)url {
     
     @try {
         NSURL* serverUrlrl = [NSURL URLWithString:url];
@@ -120,6 +120,8 @@ static EnterpriseOAuthLibrary* manager = nil;
         NSError* e;
         NSData* data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&e];
         NSDictionary* dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&e];
+        
+        [self logoutFromBrowser];
         [self.callbackObject performSelectorInBackground:self.callbackSelector withObject:dic];
     }
     
@@ -127,8 +129,14 @@ static EnterpriseOAuthLibrary* manager = nil;
         [self.callbackObject performSelectorInBackground:self.callbackSelector withObject:[NSDictionary dictionary]];
         
     }
+}
 
-    
+
+- (void)logoutFromBrowser {
+    NSString *url_string = @"https://eis.persistent.co.in/APGConsent/Login.aspx?Logout=true";
+    NSURL *url = [NSURL URLWithString:url_string];
+    NSLog(@"Url: %@ and URL = %@", url_string ,url);
+    [[UIApplication sharedApplication] openURL:url];
 }
 
 

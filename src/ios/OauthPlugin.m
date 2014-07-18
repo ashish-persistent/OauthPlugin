@@ -72,7 +72,7 @@
     NSString *baseURL = [options objectForKey:@"baseUrl"];
 
     EnterpriseOAuthLibrary *library = [EnterpriseOAuthLibrary sharedInstance];
-    [library logutUserWithCallbackObject:self selector:@selector(logoutSuccess:) andUrl:baseURL];
+    [library logutUserWithUrl:baseURL];
 }
 
 - (void)logoutSuccess:(id)data {
