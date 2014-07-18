@@ -1,5 +1,6 @@
 package com.persistent.sso.lib;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.persistent.sso.network.NetworkUtility;
+import com.persistent.sso.network.NetworkUtilityListener;
 
 public class EnterpriseAuthenticator extends BaseAuthenticator {
 
@@ -56,6 +58,34 @@ public class EnterpriseAuthenticator extends BaseAuthenticator {
 
 	}
 
+	public void logout(String url) {
+		new EnterpriseLogoutAsyncTask(clientID, secretKey,
+				new PeasClientLogoutListener() {
+
+					@Override
+					public void onLogoutFailed(String reason) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onLoggedOut(JSONObject result) {
+						logoutFromBrowser();
+						listener.onLogoutSuccess(result);
+						// TODO Auto-generated method stub
+
+					}
+				}, url).execute();
+
+	}
+
+	private void logoutFromBrowser() {
+		Uri authUri = Uri.parse("https://eis.persistent.co.in/APGConsent/Login.aspx?Logout=true");
+		Intent launchBrowser = new Intent(Intent.ACTION_VIEW, authUri);
+		launchBrowser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		pluginActivity.getBaseContext().startActivity(launchBrowser);
+	}
+
 	public void getAccessToken(Activity activity)
 			throws PeasClientAuthenticationException {
 		Intent intent = activity.getIntent();
@@ -73,31 +103,105 @@ public class EnterpriseAuthenticator extends BaseAuthenticator {
 		Log.v(TAG, "iGreet: " + authCode);
 		if (baseUrl == null || clientID == null || secretKey == null
 				|| authCode == null || redirectUrl == null) {
-			 Log.v("iGreet", "iGreet: Invalid clientID or Secret or authCode");
-			 listener.onFail("Error in login");
+			Log.v("iGreet", "iGreet: Invalid clientID or Secret or authCode");
+			listener.onFail("Error in login");
 		} else {
 			new RequestAcessTokenTask(clientID, secretKey, authCode, baseUrl,
 					redirectUrl, new PeasClientAuthenticationTokenListener() {
-				
-				@Override
-				public void onTokenReceived(JSONObject authResponse) {
-					listener.onSuccess(authResponse);
-					
-				}
-				
-				@Override
-				public void onTokenNotReceived() {
-					listener.onFail("Error in getting token");
-					// TODO Auto-generated method stub
-					
-				}
-			}).execute();
+
+						@Override
+						public void onTokenReceived(JSONObject authResponse) {
+							listener.onSuccess(authResponse);
+
+						}
+
+						@Override
+						public void onTokenNotReceived() {
+							listener.onFail("Error in getting token");
+							// TODO Auto-generated method stub
+
+						}
+					}).execute();
 		}
 
 	}
 }
 
+class EnterpriseLogoutAsyncTask extends AsyncTask<URL, Integer, String> {
+	private PeasClientLogoutListener listener;
 
+	private static String TAG = "LogoutAsyncTask";
+
+	private String url;
+	private String clientID;
+	private String clientSecret;
+
+	public EnterpriseLogoutAsyncTask(String clientID, String clientSecret,
+			PeasClientLogoutListener logoutListener, String url) {
+		this.listener = logoutListener;
+		this.url = url;
+		this.clientID = clientID;
+		this.clientSecret = clientSecret;
+	}
+
+	@Override
+	protected String doInBackground(URL... params) {
+
+		String param = clientID + ':' + clientSecret;
+		String runtimeHeaderValue = new String(Base64.encode(param.getBytes(),
+				Base64.DEFAULT)).trim();
+
+		final Map<String, String> headers = new HashMap<String, String>(1);
+		headers.put("Authorization", "Basic " + runtimeHeaderValue);
+
+		final NetworkUtility argHTTPClient = new NetworkUtility(
+				new LogoutApiListener(), headers);
+		argHTTPClient.setURL(url);
+		argHTTPClient.setRequestMethod(NetworkUtility.REQUEST_METHOD_DELETE);
+		return argHTTPClient.sendRequest();
+	}
+
+	@Override
+	protected void onPostExecute(String error) {
+		Log.d(TAG, TAG + ".onPostExecute(): error string = " + error);
+	}
+
+	private class LogoutApiListener implements NetworkUtilityListener {
+
+		@Override
+		public boolean onSuccess(String message, Object response) {
+			if (listener != null) {
+				String result = (String) response;
+				listener.onLoggedOut(parseAcessToken(result));
+			}
+			return false;
+		}
+
+		@Override
+		public void onFailure(String message, Object response) {
+			if (listener != null) {
+				listener.onLogoutFailed(message);
+			}
+		}
+
+	}
+
+	private JSONObject parseAcessToken(String responseData) {
+
+		System.out
+				.println("parseAccessToken(): responseData = " + responseData);
+		JSONObject jsonObj = null;
+		try {
+			jsonObj = new JSONObject(responseData);
+			return jsonObj;
+		} catch (JSONException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return null;
+	}
+
+}
 
 class RequestAcessTokenTask extends AsyncTask<String, Void, String> {
 	private static final String TAG = "RequestAcessTokenTask";

@@ -15,6 +15,7 @@ public class OauthPlugin extends CordovaPlugin {
 	public static final String ACTION_PEAS_AUTHORIZE = "peasAuthorize";
 	public static final String ACTION_ENTERPRISE_AUTHORIZE = "enterpriseAuthorize";
 	public static final String ACTION_PEAS_LOGOUT = "peasLogout";
+	public static final String ACTION_ENTERPRISE_LOGOUT = "enterpriseLogout";
 	public static final String TAG = OauthPlugin.class.getName();
 
 	@Override
@@ -26,7 +27,12 @@ public class OauthPlugin extends CordovaPlugin {
 
 		try {
 			String baseUrl = null, consumerKey = null, secretKey = null, redirectUrl = null;
-			if (!ACTION_PEAS_LOGOUT.equals(action)) {
+
+			if (ACTION_ENTERPRISE_LOGOUT.equals(action)) {
+				JSONObject arg_object = args.getJSONObject(0);
+				baseUrl = arg_object.getString("baseUrl");
+
+			} else if (!ACTION_PEAS_LOGOUT.equals(action)) {
 				JSONObject arg_object = args.getJSONObject(0);
 				baseUrl = arg_object.getString("baseUrl");
 				consumerKey = arg_object.getString("consumerKey");
@@ -37,7 +43,35 @@ public class OauthPlugin extends CordovaPlugin {
 			Log.v(TAG, "iGreet:" + baseUrl + consumerKey + secretKey
 					+ redirectUrl + action);
 
-			if (ACTION_ENTERPRISE_AUTHORIZE.equals(action)) {
+			if (ACTION_ENTERPRISE_LOGOUT.equals(action)) {
+				EnterpriseAuthenticator authenticator = EnterpriseAuthenticator
+						.getAuthenticationHandler();
+				authenticator.setListener(new OAuthPluginListener() {
+
+					@Override
+					public void onSuccess(JSONObject tokenDetails) {
+						// TODO Auto-generated method stub
+						callbackContext.success(tokenDetails);
+						Log.v(TAG, "onSuccess: " + tokenDetails);
+					}
+
+					@Override
+					public void onFail(String error) {
+						callbackContext.error(error);
+
+					}
+
+					@Override
+					public void onLogoutSuccess(JSONObject result) {
+						callbackContext.success(result);
+						// TODO Auto-generated method stub
+
+					}
+				});
+				authenticator.logout(baseUrl);
+				return true;
+
+			} else if (ACTION_ENTERPRISE_AUTHORIZE.equals(action)) {
 				EnterpriseAuthenticator authenticator = EnterpriseAuthenticator
 						.getAuthenticationHandler();
 				authenticator.setPluginActivity(this.cordova.getActivity());
@@ -58,7 +92,7 @@ public class OauthPlugin extends CordovaPlugin {
 					}
 
 					@Override
-					public void onLogoutSuccess() {
+					public void onLogoutSuccess(JSONObject result) {
 						// TODO Auto-generated method stub
 
 					}
@@ -88,9 +122,9 @@ public class OauthPlugin extends CordovaPlugin {
 					}
 
 					@Override
-					public void onLogoutSuccess() {
+					public void onLogoutSuccess(JSONObject result) {
 						// TODO Auto-generated method stub
-						callbackContext.success();
+						callbackContext.success(result);
 					}
 				});
 				if (ACTION_AUTHORIZE.equals(action)) {
