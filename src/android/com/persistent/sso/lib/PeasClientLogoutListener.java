@@ -1,8 +1,10 @@
 package com.persistent.sso.lib;
 
+import org.json.JSONObject;
+
 public interface PeasClientLogoutListener {
 
-	void onLoggedOut( );
-	
-	void onLogoutFailed( String reason);
+	void onLoggedOut(JSONObject result);
+
+	void onLogoutFailed(String reason);
 }

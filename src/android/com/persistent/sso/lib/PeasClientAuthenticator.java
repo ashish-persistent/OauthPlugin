@@ -55,8 +55,8 @@ public class PeasClientAuthenticator extends BaseAuthenticator {
 				}
 
 				@Override
-				public void onLoggedOut() {
-					listener.onLogoutSuccess();
+				public void onLoggedOut(JSONObject result) {
+					listener.onLogoutSuccess(result);
 					// TODO Auto-generated method stub
 
 				}
@@ -253,8 +253,9 @@ class LogoutAsyncTask extends AsyncTask<URL, Integer, String> {
 
 		@Override
 		public boolean onSuccess(String message, Object response) {
-			if (listener != null) {
-				listener.onLoggedOut();
+			if (listener != null) { 
+				String result = (String)response;
+				listener.onLoggedOut(parseAcessToken(result));
 			}
 			return false;
 		}
@@ -265,6 +266,22 @@ class LogoutAsyncTask extends AsyncTask<URL, Integer, String> {
 				listener.onLogoutFailed(message);
 			}
 		}
+		
+		private JSONObject parseAcessToken(String responseData) {
+
+			System.out
+					.println("parseAccessToken(): responseData = " + responseData);
+			JSONObject jsonObj = null;
+			try {
+				jsonObj = new JSONObject(responseData);
+				return jsonObj;
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return null;
+		}
+
 
 	}
 
